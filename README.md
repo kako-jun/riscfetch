@@ -1,18 +1,31 @@
 # 🚀 riscfetch
 
-**RISC-V Architecture Information Display Tool**
+**RISC-V Specialized System Information Tool**
 
-Show off your RISC-V setup with style! `riscfetch` is a specialized fetch tool designed exclusively for RISC-V architectures, inspired by neofetch but tailored for the RISC-V community.
+A fast, beautiful system information tool exclusively for RISC-V architectures. Inspired by **fastfetch** but focused entirely on **RISC-V specific information** that general-purpose tools don't show.
+
+## 💡 Why riscfetch?
+
+Unlike neofetch/fastfetch which show generic Linux info, `riscfetch` is laser-focused on **RISC-V architecture details**:
+
+- 🔍 **Hart Count** - RISC-V specific hardware thread information
+- 🧬 **ISA Extensions** - Detailed breakdown (M, A, F, D, C, V, Zicsr, Zifencei, Zba, Zbb, etc.)
+- 🖥️ **Board Detection** - Recognizes VisionFive 2, SiFive Unmatched, Milk-V boards
+- 📐 **Vector Extension** - V extension detection and details
+- 💾 **Cache Hierarchy** - L1/L2 cache information
+- 🏗️ **SoC Details** - Device tree compatible strings
+
+**Use riscfetch alongside fastfetch** - let fastfetch handle generic Linux info, use riscfetch to show off your RISC-V hardware!
 
 ## ✨ Features
 
 - 🎯 **RISC-V Exclusive**: Only displays information on RISC-V systems
 - 🎨 **Beautiful ASCII Art**: Multiple logo styles (default, SiFive, Kendryte)
 - ✨ **Animated Splash Screen**: Eye-catching rotating block animation (like modern AI coding agents!)
-- 📊 **Detailed ISA Information**: Shows base ISA and extensions (M, A, F, D, C, V, Zicsr, etc.)
-- 💻 **System Info**: CPU, SoC, OS, and uptime information
-- 🌈 **Colorful Output**: Terminal-friendly colored display
-- ⚡ **Benchmarks**: Optional performance testing for ISA extensions
+- 📊 **Comprehensive RISC-V Info**: Everything specific to RISC-V architecture
+- 🌈 **Colorful Output**: Terminal-friendly colored display inspired by fastfetch
+- ⚡ **Benchmarks**: Optional ISA-specific performance testing
+- 🚀 **Fast**: Written in Rust for minimal overhead
 
 ## 📦 Installation
 
@@ -92,10 +105,16 @@ riscfetch --splash --logo sifive --benchmark
 
         RISC-V Architecture Info
 
+🖥️  Board: StarFive VisionFive 2
 🧠 CPU: RV64IMAFDC
-🏗️  SoC: sifive,fu740
-🧪 Extensions: M (Multiply), A (Atomic), F (Float), D (Double), C (Compressed)
-🕹️  OS: Debian GNU/Linux 12 (bookworm) - 6.5.0-riscv64
+⚙️  Harts: 4 harts
+🏗️  SoC: starfive,jh7110
+🧪 ISA: M (Multiply), A (Atomic), F (Float), D (Double), C (Compressed)
+📐 Vector: Enabled (V extension)
+💾 Cache: L1D: 32K, L1I: 32K, L2: 2048K
+🧮 Memory: 3.45 GiB / 8.00 GiB
+🐧 Kernel: 6.5.0-riscv64
+🕹️  OS: Debian GNU/Linux 12 (bookworm)
 🚀 Uptime: 3h 42m
 ```
 
@@ -107,19 +126,20 @@ $ riscfetch
 Sorry, not RISC-V 😢
 ```
 
-## 🔧 Technical Details
+## 🔧 RISC-V Specific Information Detected
 
-`riscfetch` detects RISC-V architecture and gathers information from:
+### Hardware Information
+- **Hart Count** - `/proc/cpuinfo` processor entries (RISC-V hardware threads)
+- **Board Model** - `/proc/device-tree/model` with automatic recognition for:
+  - StarFive VisionFive 2
+  - SiFive HiFive Unmatched/Unleashed
+  - Milk-V Mars/Pioneer
+  - T-Head boards
+- **SoC Details** - Device tree compatible strings
+- **Cache Hierarchy** - `/sys/devices/system/cpu/cpu0/cache/` (L1D, L1I, L2)
 
-- `/proc/cpuinfo` - CPU and ISA information
-- `/proc/device-tree/compatible` - SoC information
-- `/etc/os-release` - OS distribution details
-- `uname` - Kernel and architecture details
-- System uptime
-
-### Supported ISA Extensions
-
-- **Base**: RV32I, RV64I
+### ISA Information
+- **Base ISA** - RV32I or RV64I detection
 - **Standard Extensions**:
   - M: Integer Multiplication and Division
   - A: Atomic Instructions
@@ -127,24 +147,45 @@ Sorry, not RISC-V 😢
   - D: Double-Precision Floating-Point
   - C: Compressed Instructions
   - V: Vector Operations
-- **Z Extensions**: Zicsr, Zifencei, Zba, Zbb, etc.
+- **Z Extensions**: Zicsr, Zifencei, Zba, Zbb, Zbc, Zbs, etc.
+- **Vector Details** - V extension presence and configuration
 
-## 🌟 Why riscfetch?
+### System Information
+- **Memory** - Real-time usage via sysinfo (important for memory-constrained RISC-V boards)
+- **Kernel** - RISC-V kernel version
+- **OS** - Distribution name
+- **Uptime** - System uptime
 
-- **Community Pride**: RISC-V users are still a minority - show off your setup!
-- **SNS-Friendly**: Perfect for sharing your RISC-V environment on social media
-- **Educational**: Learn about ISA extensions and their meanings
-- **Lightweight**: Single binary, fast execution
-- **Fun**: Because every architecture deserves its own fetch tool!
+## 🆚 riscfetch vs fastfetch
+
+| Feature | fastfetch | riscfetch |
+|---------|-----------|-----------|
+| Speed | ⚡ Blazing fast | 🚀 Fast (Rust) |
+| Scope | All Linux systems | RISC-V only |
+| Hart detection | Shows CPU count | Shows "harts" (RISC-V term) |
+| ISA extensions | ❌ | ✅ Detailed breakdown |
+| Board detection | Generic | RISC-V boards (VisionFive, etc.) |
+| Vector info | ❌ | ✅ V extension details |
+| Cache info | ✅ Generic | ✅ RISC-V specific |
+| Use together? | ✅ YES! | ✅ Complementary tools |
+
+**Recommendation**: Use both! Run `fastfetch` for general Linux info, then `riscfetch` to showcase RISC-V specific features.
 
 ## 🛣️ Roadmap
 
+- [x] Hart count detection
+- [x] ISA extension breakdown
+- [x] Board recognition (VisionFive, Unmatched, Milk-V)
+- [x] Vector extension detection
+- [x] Cache information
+- [x] Animated splash screen
+- [x] ISA-specific benchmarks
 - [ ] `--screenshot` - Generate image for social media sharing
-- [ ] `--benchmark` - Simple ISA-specific benchmarks
-- [ ] `--compare` - Compare with other architectures
-- [ ] Custom color schemes
-- [ ] JSON output for scripting
-- [ ] More SoC-specific logos
+- [ ] `--json` - JSON output for scripting
+- [ ] More board-specific logos and detection
+- [ ] VLEN/ELEN detection for vector extensions
+- [ ] Privilege level detection
+- [ ] Performance counter integration
 
 ## 🤝 Contributing
 
@@ -156,8 +197,18 @@ MIT License - See LICENSE file for details
 
 ## 🙏 Acknowledgments
 
-Inspired by [neofetch](https://github.com/dylanaraps/neofetch) and created for the awesome RISC-V community!
+- Inspired by [fastfetch](https://github.com/fastfetch-cli/fastfetch) - The modern, actively maintained system info tool
+- Thanks to [neofetch](https://github.com/dylanaraps/neofetch) for pioneering the fetch tool concept
+- Created for the awesome RISC-V community!
+
+## 🌐 Related Projects
+
+- **[fastfetch](https://github.com/fastfetch-cli/fastfetch)** - Fast system info (use alongside riscfetch!)
+- **[screenfetch](https://github.com/KittyKatt/screenFetch)** - Original fetch tool
+- **[pfetch](https://github.com/dylanaraps/pfetch)** - Minimal fetch in POSIX shell
 
 ---
 
 **Made with ❤️ for RISC-V enthusiasts**
+
+*Show the world your RISC-V setup! 🚀*

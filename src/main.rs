@@ -68,15 +68,38 @@ fn display_riscv_info(logo_style: &str) {
     display_logo(logo_style);
     println!();
 
+    // Gather all RISC-V specific information
+    let board_info = get_board_info();
     let cpu_info = get_cpu_info();
+    let hart_count = get_hart_count();
     let soc_info = get_soc_info();
     let extensions = get_extensions();
+    let vector_info = get_vector_info();
+    let cache_info = get_cache_info();
+    let memory_info = get_memory_info();
+    let kernel_info = get_kernel_info();
     let os_info = get_os_info();
     let uptime = get_uptime();
 
+    // Display RISC-V specific information (fastfetch style)
+    if !board_info.is_empty() {
+        println!("{} {}", "🖥️  Board:".bright_blue().bold(), board_info.bright_white());
+    }
     println!("{} {}", "🧠 CPU:".bright_cyan().bold(), cpu_info.bright_white());
+    println!("{} {}", "⚙️  Harts:".bright_white().bold(), hart_count.bright_white());
     println!("{} {}", "🏗️  SoC:".bright_green().bold(), soc_info.bright_white());
-    println!("{} {}", "🧪 Extensions:".bright_yellow().bold(), extensions.bright_white());
+    println!("{} {}", "🧪 ISA:".bright_yellow().bold(), extensions.bright_white());
+
+    if !vector_info.is_empty() {
+        println!("{} {}", "📐 Vector:".bright_magenta().bold(), vector_info.bright_white());
+    }
+
+    if !cache_info.is_empty() {
+        println!("{} {}", "💾 Cache:".bright_cyan().bold(), cache_info.bright_white());
+    }
+
+    println!("{} {}", "🧮 Memory:".bright_red().bold(), memory_info.bright_white());
+    println!("{} {}", "🐧 Kernel:".bright_green().bold(), kernel_info.bright_white());
     println!("{} {}", "🕹️  OS:".bright_magenta().bold(), os_info.bright_white());
     println!("{} {}", "🚀 Uptime:".bright_blue().bold(), uptime.bright_white());
     println!();
@@ -241,39 +264,31 @@ fn get_extensions() -> String {
 }
 
 fn get_os_info() -> String {
-    let mut os_parts = Vec::new();
-
-    // Get OS name
+    // Get OS name only
     if let Ok(content) = fs::read_to_string("/etc/os-release") {
         for line in content.lines() {
             if line.starts_with("PRETTY_NAME=") {
                 if let Some(name) = line.split('=').nth(1) {
-                    os_parts.push(name.trim_matches('"').to_string());
-                    break;
+                    return name.trim_matches('"').to_string();
                 }
             }
         }
     }
 
-    // Get kernel version
+    "Linux".to_string()
+}
+
+fn get_kernel_info() -> String {
     if let Ok(output) = Command::new("uname").arg("-r").output() {
         let kernel = String::from_utf8_lossy(&output.stdout).trim().to_string();
         if !kernel.is_empty() {
-            os_parts.push(kernel);
+            return kernel;
         }
     }
-
-    if os_parts.is_empty() {
-        "Linux".to_string()
-    } else {
-        os_parts.join(" - ")
-    }
+    "Unknown".to_string()
 }
 
 fn get_uptime() -> String {
-    let mut sys = System::new_all();
-    sys.refresh_all();
-
     let uptime_secs = System::uptime();
     let hours = uptime_secs / 3600;
     let minutes = (uptime_secs % 3600) / 60;
@@ -283,6 +298,131 @@ fn get_uptime() -> String {
     } else {
         format!("{}m", minutes)
     }
+}
+
+fn get_board_info() -> String {
+    // Try to get board name from device tree
+    if let Ok(content) = fs::read_to_string("/proc/device-tree/model") {
+        let model = content.trim_matches('\0').trim();
+        if !model.is_empty() {
+            return model.to_string();
+        }
+    }
+
+    // Fallback to compatible string
+    if let Ok(content) = fs::read_to_string("/proc/device-tree/compatible") {
+        let parts: Vec<&str> = content.split('\0').collect();
+        if let Some(first) = parts.first() {
+            if !first.is_empty() {
+                // Extract readable board name
+                if first.contains("starfive") {
+                    if first.contains("visionfive2") || first.contains("visionfive-2") {
+                        return "StarFive VisionFive 2".to_string();
+                    }
+                    return "StarFive Board".to_string();
+                } else if first.contains("sifive") {
+                    if first.contains("unmatched") {
+                        return "SiFive HiFive Unmatched".to_string();
+                    } else if first.contains("unleashed") {
+                        return "SiFive HiFive Unleashed".to_string();
+                    }
+                    return "SiFive Board".to_string();
+                } else if first.contains("milkv") || first.contains("milk-v") {
+                    if first.contains("mars") {
+                        return "Milk-V Mars".to_string();
+                    } else if first.contains("pioneer") {
+                        return "Milk-V Pioneer".to_string();
+                    }
+                    return "Milk-V Board".to_string();
+                } else if first.contains("thead") {
+                    return "T-Head Board".to_string();
+                }
+            }
+        }
+    }
+
+    String::new()
+}
+
+fn get_hart_count() -> String {
+    // Count number of processor entries in /proc/cpuinfo
+    if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
+        let count = content.lines()
+            .filter(|line| line.starts_with("processor"))
+            .count();
+        if count > 0 {
+            return format!("{} hart{}", count, if count > 1 { "s" } else { "" });
+        }
+    }
+
+    // Fallback: use sysinfo
+    let mut sys = System::new();
+    sys.refresh_cpu_all();
+    let count = sys.cpus().len();
+    format!("{} hart{}", count, if count > 1 { "s" } else { "" })
+}
+
+fn get_vector_info() -> String {
+    if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
+        for line in content.lines() {
+            if line.starts_with("isa") {
+                if let Some(isa) = line.split(':').nth(1) {
+                    let isa = isa.trim().to_lowercase();
+                    if isa.contains('v') || isa.contains("vector") {
+                        // Try to get VLEN from device tree or sysfs
+                        // Default: just indicate vector is present
+                        return "Enabled (V extension)".to_string();
+                    }
+                }
+            }
+        }
+    }
+    String::new()
+}
+
+fn get_cache_info() -> String {
+    let mut cache_parts = Vec::new();
+
+    // Try to get cache info from /sys/devices/system/cpu/cpu0/cache/
+    if let Ok(l1d_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index0/size") {
+        let size = l1d_size.trim();
+        if !size.is_empty() {
+            cache_parts.push(format!("L1D: {}", size));
+        }
+    }
+
+    if let Ok(l1i_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index1/size") {
+        let size = l1i_size.trim();
+        if !size.is_empty() {
+            cache_parts.push(format!("L1I: {}", size));
+        }
+    }
+
+    if let Ok(l2_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index2/size") {
+        let size = l2_size.trim();
+        if !size.is_empty() {
+            cache_parts.push(format!("L2: {}", size));
+        }
+    }
+
+    if cache_parts.is_empty() {
+        String::new()
+    } else {
+        cache_parts.join(", ")
+    }
+}
+
+fn get_memory_info() -> String {
+    let mut sys = System::new();
+    sys.refresh_memory();
+
+    let total_mem = sys.total_memory();
+    let used_mem = sys.used_memory();
+
+    let total_gb = total_mem as f64 / 1_073_741_824.0; // Convert KB to GB
+    let used_gb = used_mem as f64 / 1_073_741_824.0;
+
+    format!("{:.2} GiB / {:.2} GiB", used_gb, total_gb)
 }
 
 fn run_benchmarks() {
