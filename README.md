@@ -8,9 +8,11 @@ Show off your RISC-V setup with style! `riscfetch` is a specialized fetch tool d
 
 - 🎯 **RISC-V Exclusive**: Only displays information on RISC-V systems
 - 🎨 **Beautiful ASCII Art**: Multiple logo styles (default, SiFive, Kendryte)
+- ✨ **Animated Splash Screen**: Eye-catching rotating block animation (like modern AI coding agents!)
 - 📊 **Detailed ISA Information**: Shows base ISA and extensions (M, A, F, D, C, V, Zicsr, etc.)
 - 💻 **System Info**: CPU, SoC, OS, and uptime information
 - 🌈 **Colorful Output**: Terminal-friendly colored display
+- ⚡ **Benchmarks**: Optional performance testing for ISA extensions
 
 ## 📦 Installation
 
@@ -39,6 +41,16 @@ Simply run the command:
 riscfetch
 ```
 
+### With Animated Splash Screen
+
+Show a cool rotating block animation (inspired by modern AI coding agents):
+
+```bash
+riscfetch --splash
+```
+
+The splash screen features a colorful RISC-V logo that rotates with smooth color transitions!
+
 ### With Logo Options
 
 Choose different logo styles:
@@ -52,6 +64,21 @@ riscfetch --logo sifive
 
 # Kendryte logo
 riscfetch --logo kendryte
+```
+
+### With Benchmarks
+
+Run ISA-specific performance benchmarks:
+
+```bash
+riscfetch --benchmark
+```
+
+### Combine Options
+
+```bash
+# Full experience with splash, custom logo, and benchmarks
+riscfetch --splash --logo sifive --benchmark
 ```
 
 ## 📸 Example Output
