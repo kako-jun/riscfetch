@@ -2,7 +2,6 @@
 /target/
 **/*.rs.bk
 *.pdb
-Cargo.lock
 
 # IDE
 .vscode/
@@ -14,3 +13,10 @@ Cargo.lock
 # OS
 .DS_Store
 Thumbs.db
+
+# cargo-husky
+.cargo-husky/
+
+# Backup files
+*.bak
+*.orig
