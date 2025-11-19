@@ -8,32 +8,36 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  build-and-release:
-    name: Build and Release
+  build:
+    name: Build (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            artifact_name: riscfetch
+            binary: riscfetch
             asset_name: riscfetch-linux-x86_64
           - os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-            artifact_name: riscfetch
+            binary: riscfetch
             asset_name: riscfetch-linux-x86_64-musl
           - os: macos-latest
             target: x86_64-apple-darwin
-            artifact_name: riscfetch
+            binary: riscfetch
             asset_name: riscfetch-macos-x86_64
           - os: macos-latest
             target: aarch64-apple-darwin
-            artifact_name: riscfetch
+            binary: riscfetch
             asset_name: riscfetch-macos-aarch64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
-            artifact_name: riscfetch.exe
+            binary: riscfetch.exe
             asset_name: riscfetch-windows-x86_64.exe
 
     steps:
@@ -53,40 +57,36 @@ jobs:
 
       - name: Strip binary (Unix)
         if: runner.os != 'Windows'
-        run: strip target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
+        run: strip target/${{ matrix.target }}/release/${{ matrix.binary }}
 
-      - name: Upload binaries to release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
-          asset_name: ${{ matrix.asset_name }}
-          tag: ${{ github.ref }}
-          overwrite: true
-
-  create-release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: build-and-release
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Extract version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Create Release Notes
+      - name: Package artifact
         run: |
-          echo "# riscfetch ${{ steps.get_version.outputs.VERSION }}" > release_notes.md
-          echo "" >> release_notes.md
-          echo "RISC-V architecture information display tool" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "## Installation" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "Download the appropriate binary for your platform and make it executable." >> release_notes.md
-          echo "" >> release_notes.md
-          echo "## Platforms" >> release_notes.md
-          echo "" >> release_notes.md
-          echo "- Linux (x86_64, musl)" >> release_notes.md
-          echo "- macOS (x86_64, ARM64)" >> release_notes.md
-          echo "- Windows (x86_64)" >> release_notes.md
+          mkdir -p dist
+          cp target/${{ matrix.target }}/release/${{ matrix.binary }} dist/${{ matrix.asset_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}
+          if-no-files-found: error
+
+  release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

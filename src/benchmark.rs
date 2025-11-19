@@ -13,7 +13,7 @@ pub fn run_benchmarks() {
     println!(
         "{} {} {}",
         "🔢 Integer Ops (M):".bright_cyan().bold(),
-        format!("{:.2}", int_score).bright_white(),
+        format!("{int_score:.2}").bright_white(),
         "MOPS".bright_white().dimmed()
     );
 
@@ -22,7 +22,7 @@ pub fn run_benchmarks() {
     println!(
         "{} {} {}",
         "🎯 Float Ops (F/D):".bright_green().bold(),
-        format!("{:.2}", float_score).bright_white(),
+        format!("{float_score:.2}").bright_white(),
         "MFLOPS".bright_white().dimmed()
     );
 
@@ -31,7 +31,7 @@ pub fn run_benchmarks() {
     println!(
         "{} {} {}",
         "💾 Memory Bandwidth:".bright_magenta().bold(),
-        format!("{:.2}", mem_score).bright_white(),
+        format!("{mem_score:.2}").bright_white(),
         "MB/s".bright_white().dimmed()
     );
 

@@ -119,7 +119,7 @@ pub fn get_hart_count() -> String {
             .filter(|line| line.starts_with("processor"))
             .count();
         if count > 0 {
-            return format!("{} hart{}", count, if count > 1 { "s" } else { "" });
+            return format!("{count} hart{}", if count > 1 { "s" } else { "" });
         }
     }
 
@@ -127,7 +127,7 @@ pub fn get_hart_count() -> String {
     let mut sys = System::new();
     sys.refresh_cpu_all();
     let count = sys.cpus().len();
-    format!("{} hart{}", count, if count > 1 { "s" } else { "" })
+    format!("{count} hart{}", if count > 1 { "s" } else { "" })
 }
 
 pub fn get_soc_info() -> String {
@@ -137,7 +137,7 @@ pub fn get_soc_info() -> String {
                 if let Some(value) = line.split(':').nth(1) {
                     let value = value.trim();
                     if !value.is_empty() && value != "0x0" {
-                        return format!("Vendor ID: {}", value);
+                        return format!("Vendor ID: {value}");
                     }
                 }
             }
@@ -239,21 +239,21 @@ pub fn get_cache_info() -> String {
     if let Ok(l1d_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index0/size") {
         let size = l1d_size.trim();
         if !size.is_empty() {
-            cache_parts.push(format!("L1D: {}", size));
+            cache_parts.push(format!("L1D: {size}"));
         }
     }
 
     if let Ok(l1i_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index1/size") {
         let size = l1i_size.trim();
         if !size.is_empty() {
-            cache_parts.push(format!("L1I: {}", size));
+            cache_parts.push(format!("L1I: {size}"));
         }
     }
 
     if let Ok(l2_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index2/size") {
         let size = l2_size.trim();
         if !size.is_empty() {
-            cache_parts.push(format!("L2: {}", size));
+            cache_parts.push(format!("L2: {size}"));
         }
     }
 
@@ -274,7 +274,7 @@ pub fn get_memory_info() -> String {
     let total_gb = total_mem as f64 / 1_073_741_824.0;
     let used_gb = used_mem as f64 / 1_073_741_824.0;
 
-    format!("{:.2} GiB / {:.2} GiB", used_gb, total_gb)
+    format!("{used_gb:.2} GiB / {total_gb:.2} GiB")
 }
 
 pub fn get_kernel_info() -> String {
@@ -307,9 +307,9 @@ pub fn get_uptime() -> String {
     let minutes = (uptime_secs % 3600) / 60;
 
     if hours > 0 {
-        format!("{}h {}m", hours, minutes)
+        format!("{hours}h {minutes}m")
     } else {
-        format!("{}m", minutes)
+        format!("{minutes}m")
     }
 }
 

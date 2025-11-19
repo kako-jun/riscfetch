@@ -14,9 +14,6 @@
 .DS_Store
 Thumbs.db
 
-# cargo-husky
-.cargo-husky/
-
 # Backup files
 *.bak
 *.orig
