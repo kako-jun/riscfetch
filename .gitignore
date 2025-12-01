@@ -18,3 +18,4 @@ Thumbs.db
 *.bak
 *.orig
 .claude/settings.local.json
+.serena/
