@@ -1,5 +1,10 @@
 # riscfetch
 
+[![CI](https://github.com/kako-jun/riscfetch/actions/workflows/ci.yml/badge.svg)](https://github.com/kako-jun/riscfetch/actions/workflows/ci.yml)
+[![Crates.io](https://img.shields.io/crates/v/riscfetch.svg)](https://crates.io/crates/riscfetch)
+[![docs.rs](https://docs.rs/riscfetch-core/badge.svg)](https://docs.rs/riscfetch-core)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 System information tool for RISC-V. Displays ISA extensions, hart count, hardware IDs, and more.
 
 **RISC-V only.** Exits on other architectures.
