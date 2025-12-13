@@ -106,27 +106,38 @@ pub fn parse_extensions_compact(isa: &str) -> String {
     let isa = isa.to_lowercase();
     let mut exts = Vec::new();
 
-    let standard = [
-        ('i', "I"),
-        ('m', "M"),
-        ('a', "A"),
-        ('f', "F"),
-        ('d', "D"),
-        ('q', "Q"),
-        ('c', "C"),
-        ('b', "B"),
-        ('v', "V"),
-        ('h', "H"),
-    ];
-
     // Get the base part before any underscore
     let base = isa.split('_').next().unwrap_or(&isa);
     let ext_part = strip_rv_prefix(base);
 
-    for (ch, name) in standard {
-        if ext_part.contains(ch) {
+    // G is shorthand for IMAFD (per RISC-V spec)
+    let has_g = ext_part.contains('g');
+
+    // Standard extensions in canonical order
+    // Note: E and I are mutually exclusive
+    let standard = [
+        ('i', "I", false), // (char, name, implied_by_g)
+        ('e', "E", false), // E = embedded (16 registers)
+        ('m', "M", true),
+        ('a', "A", true),
+        ('f', "F", true),
+        ('d', "D", true),
+        ('q', "Q", false),
+        ('c', "C", false),
+        ('b', "B", false),
+        ('v', "V", false),
+        ('h', "H", false),
+    ];
+
+    for (ch, name, implied_by_g) in standard {
+        if ext_part.contains(ch) || (has_g && implied_by_g) {
             exts.push(name);
         }
+    }
+
+    // If G is present but I wasn't explicitly added, add I (G implies IMAFD)
+    if has_g && !exts.contains(&"I") && !exts.contains(&"E") {
+        exts.insert(0, "I");
     }
 
     exts.join(" ")
@@ -157,8 +168,9 @@ pub fn get_z_extensions() -> String {
 }
 
 /// Standard extension definitions
-const STANDARD_EXTENSIONS: [(&char, &str, &str); 10] = [
+const STANDARD_EXTENSIONS: [(&char, &str, &str); 11] = [
     (&'i', "I", "Base Integer Instructions"),
+    (&'e', "E", "Embedded (16 registers)"),
     (&'m', "M", "Integer Multiply/Divide"),
     (&'a', "A", "Atomic Instructions"),
     (&'f', "F", "Single-Precision Float"),
@@ -266,11 +278,21 @@ pub fn parse_vector_from_isa(isa: &str) -> Option<String> {
 
     let mut details = vec!["Enabled".to_string()];
 
-    if isa.contains("zvl512b") {
+    // Detect VLEN from zvl* extensions (use largest value)
+    if isa.contains("zvl1024b") {
+        details.push("VLEN>=1024".to_string());
+    } else if isa.contains("zvl512b") {
         details.push("VLEN>=512".to_string());
     } else if isa.contains("zvl256b") {
         details.push("VLEN>=256".to_string());
     } else if isa.contains("zvl128b") {
+        details.push("VLEN>=128".to_string());
+    } else if isa.contains("zvl64b") {
+        details.push("VLEN>=64".to_string());
+    } else if isa.contains("zvl32b") {
+        details.push("VLEN>=32".to_string());
+    } else {
+        // Default VLEN is 128 when V is present but no zvl* specified
         details.push("VLEN>=128".to_string());
     }
 
@@ -707,5 +729,157 @@ mod tests {
         let result = parse_z_extensions("rv64i_zba_zbb_zbc");
         let parts: Vec<&str> = result.split(' ').collect();
         assert_eq!(parts, vec!["zba", "zbb", "zbc"]);
+    }
+
+    // =======================================================
+    // Specification-based tests (from SPEC.md)
+    // These tests define EXPECTED behavior, not current behavior
+    // =======================================================
+
+    mod spec_tests {
+        use super::super::*;
+
+        // --- parse_extensions_compact ---
+        // Reference: SPEC.md "parse_extensions_compact" section
+
+        #[test]
+        fn spec_g_expansion() {
+            // G is shorthand for IMAFD per RISC-V spec
+            assert_eq!(parse_extensions_compact("rv64gc"), "I M A F D C");
+        }
+
+        #[test]
+        fn spec_g_expansion_uppercase() {
+            assert_eq!(parse_extensions_compact("RV64GC"), "I M A F D C");
+        }
+
+        #[test]
+        fn spec_e_extension() {
+            // E = embedded (16 registers), mutually exclusive with I
+            assert_eq!(parse_extensions_compact("rv32e"), "E");
+        }
+
+        #[test]
+        fn spec_e_with_c() {
+            assert_eq!(parse_extensions_compact("rv32ec"), "E C");
+        }
+
+        #[test]
+        fn spec_standard_extensions() {
+            assert_eq!(parse_extensions_compact("rv64imafdc"), "I M A F D C");
+        }
+
+        #[test]
+        fn spec_with_vector() {
+            assert_eq!(parse_extensions_compact("rv64imafdcv"), "I M A F D C V");
+        }
+
+        #[test]
+        fn spec_rv64_prefix_not_vector() {
+            // The 'v' in 'rv64' must NOT be detected as Vector
+            let result = parse_extensions_compact("rv64imafdc");
+            assert!(!result.contains("V"), "rv64 prefix should not trigger V detection");
+        }
+
+        #[test]
+        fn spec_z_extensions_ignored() {
+            // Z-extensions after underscore should not affect base extensions
+            assert_eq!(parse_extensions_compact("rv64imafdc_zba_zbb"), "I M A F D C");
+        }
+
+        #[test]
+        fn spec_empty_input() {
+            assert_eq!(parse_extensions_compact(""), "");
+        }
+
+        #[test]
+        fn spec_invalid_input() {
+            assert_eq!(parse_extensions_compact("unknown"), "");
+        }
+
+        #[test]
+        fn spec_rv64_only() {
+            // No extensions specified = no output
+            assert_eq!(parse_extensions_compact("rv64"), "");
+        }
+
+        // --- parse_z_extensions ---
+        // Reference: SPEC.md "parse_z_extensions" section
+
+        #[test]
+        fn spec_z_extensions_basic() {
+            assert_eq!(parse_z_extensions("rv64i_zicsr_zifencei"), "zicsr zifencei");
+        }
+
+        #[test]
+        fn spec_z_extensions_order() {
+            assert_eq!(parse_z_extensions("rv64i_zba_zbb_zbc"), "zba zbb zbc");
+        }
+
+        #[test]
+        fn spec_s_extensions() {
+            // S-extensions should also be included
+            let result = parse_z_extensions("rv64i_sstc");
+            assert!(result.contains("sstc"));
+        }
+
+        #[test]
+        fn spec_z_extensions_none() {
+            assert_eq!(parse_z_extensions("rv64imafdc"), "");
+        }
+
+        #[test]
+        fn spec_z_extensions_case() {
+            // Output should be lowercase
+            let result = parse_z_extensions("rv64i_Zicsr");
+            assert_eq!(result, "zicsr");
+        }
+
+        // --- parse_vector_from_isa ---
+        // Reference: SPEC.md "parse_vector_from_isa" section
+
+        #[test]
+        fn spec_vector_with_v() {
+            let result = parse_vector_from_isa("rv64imafdcv");
+            assert!(result.is_some());
+            let detail = result.unwrap();
+            assert!(detail.contains("Enabled"));
+        }
+
+        #[test]
+        fn spec_vector_none() {
+            let result = parse_vector_from_isa("rv64imafdc");
+            assert!(result.is_none());
+        }
+
+        #[test]
+        fn spec_vector_zve() {
+            // Zve* implies vector support
+            let result = parse_vector_from_isa("rv64imac_zve32x");
+            assert!(result.is_some());
+        }
+
+        #[test]
+        fn spec_vector_vlen_256() {
+            let result = parse_vector_from_isa("rv64imafdcv_zvl256b");
+            assert!(result.is_some());
+            assert!(result.unwrap().contains("VLEN>=256"));
+        }
+
+        #[test]
+        fn spec_vector_vlen_largest() {
+            // Multiple zvl* should use largest
+            let result = parse_vector_from_isa("rv64imafdcv_zvl128b_zvl256b");
+            assert!(result.is_some());
+            assert!(result.unwrap().contains("VLEN>=256"));
+        }
+
+        #[test]
+        fn spec_vector_default_vlen() {
+            // V without zvl* defaults to VLEN>=128
+            let result = parse_vector_from_isa("rv64imafdcv");
+            assert!(result.is_some());
+            assert!(result.unwrap().contains("VLEN>=128"));
+        }
     }
 }
