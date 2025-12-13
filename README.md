@@ -72,7 +72,16 @@ Issues and pull requests are welcome!
 - Support for new RISC-V boards
 - Documentation improvements
 
-If you have access to RISC-V hardware, testing on real devices is especially appreciated.
+### Testing Help Wanted
+
+We have limited hardware for testing. If you can test on any of the following, please report your results (working or not):
+
+- **RV32E** (embedded with 16 registers) - e.g., ESP32-C3, CH32V003
+- **Non-Vector CPUs** - e.g., VisionFive 2, Allwinner D1
+- **Different VLEN values** - VLEN=128, 512, 1024, etc.
+- **Exotic Z-extensions** - Zk (crypto), Zcmp, Zacas, etc.
+
+Even "it works" reports are valuable! Please open an issue with your `/proc/cpuinfo` and riscfetch output.
 
 ## License
 
