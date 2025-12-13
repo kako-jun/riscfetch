@@ -15,8 +15,23 @@ I enjoy anime, movies, and food from all over the world. Just a fan of cool tech
 
 ## Install
 
+### From crates.io
+
 ```bash
 cargo install riscfetch
+```
+
+### From GitHub Releases
+
+```bash
+# Download the latest release
+curl -LO https://github.com/kako-jun/riscfetch/releases/latest/download/riscfetch-linux-riscv64
+
+# Make it executable
+chmod +x riscfetch-linux-riscv64
+
+# Move to PATH
+sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 ```
 
 ## Usage
@@ -47,6 +62,7 @@ OS:     Ubuntu 24.04 LTS
 Kernel: 6.8.0-riscv64
 Memory: 3.45 GiB / 8.00 GiB
 Uptime: 3h 42m
+User:   user@visionfive2
 ```
 
 ## Options

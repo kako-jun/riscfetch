@@ -127,7 +127,11 @@ fn generate_figlet_logo(vendor: LogoVendor) -> String {
                     let mut result = String::new();
                     result.push('\n');
                     result.push_str(&fig_str);
-                    result.push_str(&format!("{:>width$}\n", subtitle, width = padding + subtitle.len()));
+                    result.push_str(&format!(
+                        "{:>width$}\n",
+                        subtitle,
+                        width = padding + subtitle.len()
+                    ));
                     result
                 }
                 None => fallback_logo(vendor),

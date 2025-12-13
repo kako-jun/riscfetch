@@ -79,6 +79,7 @@ OS:     Ubuntu 24.04 LTS
 Kernel: 6.8.0-riscv64
 Memory: 3.45 GiB / 8.00 GiB
 Uptime: 3h 42m
+User:   user@visionfive2
 ```
 
 ### Field Definitions
@@ -97,6 +98,7 @@ Uptime: 3h 42m
 | Kernel | Kernel version | `6.8.0-riscv64` |
 | Memory | Used / Total memory | `3.45 GiB / 8.00 GiB` |
 | Uptime | System uptime | `3h 42m` |
+| User | Username and hostname | `user@hostname` |
 
 ### Separator
 
