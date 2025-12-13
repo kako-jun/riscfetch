@@ -4,7 +4,7 @@ use std::time::Instant;
 pub fn run_benchmarks() {
     println!(
         "{}",
-        "⚡ Running RISC-V Benchmarks...".bright_yellow().bold()
+        "Running RISC-V Benchmarks...".bright_yellow().bold()
     );
     println!();
 
@@ -12,7 +12,7 @@ pub fn run_benchmarks() {
     let int_score = benchmark_integer_ops();
     println!(
         "{} {} {}",
-        "🔢 Integer Ops (M):".bright_cyan().bold(),
+        "Integer Ops (M):".bright_cyan().bold(),
         format!("{int_score:.2}").bright_white(),
         "MOPS".bright_white().dimmed()
     );
@@ -21,7 +21,7 @@ pub fn run_benchmarks() {
     let float_score = benchmark_float_ops();
     println!(
         "{} {} {}",
-        "🎯 Float Ops (F/D):".bright_green().bold(),
+        "Float Ops (F/D):".bright_green().bold(),
         format!("{float_score:.2}").bright_white(),
         "MFLOPS".bright_white().dimmed()
     );
@@ -30,13 +30,13 @@ pub fn run_benchmarks() {
     let mem_score = benchmark_memory();
     println!(
         "{} {} {}",
-        "💾 Memory Bandwidth:".bright_magenta().bold(),
+        "Memory Bandwidth:".bright_magenta().bold(),
         format!("{mem_score:.2}").bright_white(),
         "MB/s".bright_white().dimmed()
     );
 
     println!();
-    println!("{}", "✨ Benchmarks complete!".bright_yellow().bold());
+    println!("{}", "Benchmarks complete!".bright_yellow().bold());
     println!();
 }
 

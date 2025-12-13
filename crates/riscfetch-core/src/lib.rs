@@ -36,8 +36,7 @@ pub use hardware::{
 
 // Re-export system functions
 pub use system::{
-    get_kernel_info, get_memory_bytes, get_memory_info, get_os_info, get_uptime,
-    get_uptime_seconds,
+    get_kernel_info, get_memory_bytes, get_memory_info, get_os_info, get_uptime, get_uptime_seconds,
 };
 
 use std::fs;
@@ -353,7 +352,10 @@ mod tests {
 
         #[test]
         fn spec_z_extensions_ignored() {
-            assert_eq!(parse_extensions_compact("rv64imafdc_zba_zbb"), "I M A F D C");
+            assert_eq!(
+                parse_extensions_compact("rv64imafdc_zba_zbb"),
+                "I M A F D C"
+            );
         }
 
         #[test]
@@ -482,7 +484,10 @@ mod tests {
         fn hw_hart_count_positive() {
             let hart_str = get_hart_count();
             assert!(hart_str.contains("hart"));
-            let num: String = hart_str.chars().take_while(|c| c.is_ascii_digit()).collect();
+            let num: String = hart_str
+                .chars()
+                .take_while(|c| c.is_ascii_digit())
+                .collect();
             let count: usize = num.parse().unwrap_or(0);
             assert!(count > 0);
         }
@@ -490,9 +495,8 @@ mod tests {
         #[test]
         fn hw_hardware_ids_present() {
             let ids = get_hardware_ids();
-            let has_any = !ids.mvendorid.is_empty()
-                || !ids.marchid.is_empty()
-                || !ids.mimpid.is_empty();
+            let has_any =
+                !ids.mvendorid.is_empty() || !ids.marchid.is_empty() || !ids.mimpid.is_empty();
             assert!(has_any);
         }
 
