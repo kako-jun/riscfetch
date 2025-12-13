@@ -36,7 +36,7 @@ Per RISC-V specification:
 | B | Bit Manipulation | Bit manipulation operations |
 | V | Vector | Vector operations (SIMD) |
 | H | Hypervisor | Hypervisor extension |
-| G | General | Shorthand for IMAFD (not a real extension) |
+| G | General | Shorthand for IMAFDZicsr_Zifencei (not a real extension) |
 
 ---
 
@@ -95,6 +95,7 @@ Extracts Z-extensions and S-extensions from ISA string.
 | `"rv64i_zba_zbb_zbc"` | `"zba zbb zbc"` | Order preserved |
 | `"rv64i_sstc"` | `"sstc"` | S-extensions included |
 | `"rv64imafdc"` | `""` | No Z-extensions |
+| `"rv64gc"` | `"zicsr zifencei"` | G implies Zicsr_Zifencei |
 | `"rv64i_Zicsr"` | `"zicsr"` | Case normalized to lowercase |
 | `""` | `""` | Empty input |
 
@@ -115,7 +116,7 @@ Detects vector extension and infers VLEN from zvl* extensions.
 
 | Input | Expected Output | Reason |
 |-------|-----------------|--------|
-| `"rv64imafdcv"` | `Some("Enabled, VLEN>=128")` | V present, default VLEN |
+| `"rv64imafdcv"` | `Some("Enabled")` | V present, VLEN unknown |
 | `"rv64imafdc"` | `None` | No V extension |
 | `"rv64i_zve32x"` | `Some("Enabled, ...")` | Zve* implies vector |
 | `"rv64imafdcv_zvl256b"` | `Some("Enabled, VLEN>=256")` | VLEN from zvl256b |
@@ -130,7 +131,7 @@ Detects vector extension and infers VLEN from zvl* extensions.
 - `zvl512b` → VLEN >= 512
 - `zvl1024b` → VLEN >= 1024
 - If multiple present, use largest value
-- Default VLEN is 128 if V present but no zvl* specified
+- If V present but no zvl* specified, VLEN is implementation-defined (do not display)
 
 ---
 

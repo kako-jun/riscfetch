@@ -153,8 +153,21 @@ pub fn parse_z_extensions(isa: &str) -> String {
     let isa = isa.to_lowercase();
     let mut z_exts = Vec::new();
 
+    // Check if G is present (G implies Zicsr_Zifencei per RISC-V spec)
+    let base = isa.split('_').next().unwrap_or(&isa);
+    let ext_part = strip_rv_prefix(base);
+    let has_g = ext_part.contains('g');
+
+    // Add implied Z-extensions from G
+    if has_g {
+        z_exts.push("zicsr".to_string());
+        z_exts.push("zifencei".to_string());
+    }
+
+    // Add explicit Z-extensions and S-extensions
     for part in isa.split('_') {
-        if part.starts_with('z') || part.starts_with('s') {
+        if (part.starts_with('z') || part.starts_with('s')) && !z_exts.contains(&part.to_string())
+        {
             z_exts.push(part.to_string());
         }
     }
@@ -279,6 +292,7 @@ pub fn parse_vector_from_isa(isa: &str) -> Option<String> {
     let mut details = vec!["Enabled".to_string()];
 
     // Detect VLEN from zvl* extensions (use largest value)
+    // If no zvl* specified, VLEN is implementation-defined (do not display)
     if isa.contains("zvl1024b") {
         details.push("VLEN>=1024".to_string());
     } else if isa.contains("zvl512b") {
@@ -291,10 +305,8 @@ pub fn parse_vector_from_isa(isa: &str) -> Option<String> {
         details.push("VLEN>=64".to_string());
     } else if isa.contains("zvl32b") {
         details.push("VLEN>=32".to_string());
-    } else {
-        // Default VLEN is 128 when V is present but no zvl* specified
-        details.push("VLEN>=128".to_string());
     }
+    // No default VLEN - it's implementation-defined per RISC-V spec
 
     Some(details.join(", "))
 }
@@ -778,13 +790,19 @@ mod tests {
         fn spec_rv64_prefix_not_vector() {
             // The 'v' in 'rv64' must NOT be detected as Vector
             let result = parse_extensions_compact("rv64imafdc");
-            assert!(!result.contains("V"), "rv64 prefix should not trigger V detection");
+            assert!(
+                !result.contains("V"),
+                "rv64 prefix should not trigger V detection"
+            );
         }
 
         #[test]
         fn spec_z_extensions_ignored() {
             // Z-extensions after underscore should not affect base extensions
-            assert_eq!(parse_extensions_compact("rv64imafdc_zba_zbb"), "I M A F D C");
+            assert_eq!(
+                parse_extensions_compact("rv64imafdc_zba_zbb"),
+                "I M A F D C"
+            );
         }
 
         #[test]
@@ -826,6 +844,12 @@ mod tests {
         #[test]
         fn spec_z_extensions_none() {
             assert_eq!(parse_z_extensions("rv64imafdc"), "");
+        }
+
+        #[test]
+        fn spec_z_extensions_g_implies() {
+            // G implies Zicsr_Zifencei per RISC-V spec
+            assert_eq!(parse_z_extensions("rv64gc"), "zicsr zifencei");
         }
 
         #[test]
@@ -875,11 +899,13 @@ mod tests {
         }
 
         #[test]
-        fn spec_vector_default_vlen() {
-            // V without zvl* defaults to VLEN>=128
+        fn spec_vector_no_default_vlen() {
+            // V without zvl*: VLEN is implementation-defined, not displayed
             let result = parse_vector_from_isa("rv64imafdcv");
             assert!(result.is_some());
-            assert!(result.unwrap().contains("VLEN>=128"));
+            let detail = result.unwrap();
+            assert!(detail.contains("Enabled"));
+            assert!(!detail.contains("VLEN"), "VLEN should not be shown without zvl*");
         }
     }
 }
