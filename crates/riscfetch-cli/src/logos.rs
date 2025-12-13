@@ -207,7 +207,11 @@ mod tests {
 
         for vendor in vendors {
             let logo = generate_logo(vendor, LogoStyle::Normal);
-            assert!(!logo.is_empty(), "Logo for {:?} should not be empty", vendor);
+            assert!(
+                !logo.is_empty(),
+                "Logo for {:?} should not be empty",
+                vendor
+            );
         }
     }
 }

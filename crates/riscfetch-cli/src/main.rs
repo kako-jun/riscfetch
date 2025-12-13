@@ -154,5 +154,17 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool) {
     // Uptime
     println!("{} {}", "Uptime:".bright_blue().bold(), uptime.white());
 
+    // User@Hostname
+    let user = std::env::var("USER").unwrap_or_else(|_| "unknown".to_string());
+    let hostname = gethostname::gethostname()
+        .to_string_lossy()
+        .to_string();
+    println!(
+        "{} {}@{}",
+        "User:".bright_blue().bold(),
+        user.white(),
+        hostname.white()
+    );
+
     println!();
 }
