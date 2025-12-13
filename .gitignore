@@ -19,3 +19,4 @@ Thumbs.db
 *.orig
 .claude/settings.local.json
 .serena/
+.mcp.json
