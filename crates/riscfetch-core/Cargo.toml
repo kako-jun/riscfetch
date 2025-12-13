@@ -1,6 +1,6 @@
 [package]
 name = "riscfetch-core"
-version = "0.2.0"
+version = "1.0.0"
 edition = "2021"
 authors = ["kako-jun"]
 description = "RISC-V system information library - ISA extensions, hart count, hardware IDs"
