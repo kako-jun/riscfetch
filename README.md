@@ -11,6 +11,8 @@ System information tool for RISC-V. Displays ISA extensions, hart count, hardwar
 
 **RISC-V only.** Exits on other architectures.
 
+![riscfetch screenshot](assets/screenshot.webp)
+
 ## Why RISC-V?
 
 I enjoy anime, movies, and food from all over the world. Just a fan of cool tech and the future. RISC-V is fun to tinker with, and I wanted a neofetch-style tool for it.

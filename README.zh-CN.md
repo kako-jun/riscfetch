@@ -11,6 +11,8 @@ RISC-V 系统信息工具。显示 ISA 扩展、hart 数量、硬件 ID 等信�
 
 **仅支持 RISC-V。** 在其他架构上会退出。
 
+![riscfetch screenshot](assets/screenshot.webp)
+
 ## 为什么选择 RISC-V？
 
 我喜欢来自世界各地的动漫、电影和美食。只是一个喜欢酷技术和未来的爱好者。RISC-V 很有趣，我想为它做一个类似 neofetch 的工具。

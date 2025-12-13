@@ -11,6 +11,8 @@ RISC-V システム情報ツール。ISA 拡張、hart 数、ハードウェア 
 
 **RISC-V 専用。** 他のアーキテクチャでは終了します。
 
+![riscfetch screenshot](assets/screenshot.webp)
+
 ## なぜ RISC-V？
 
 世界中のアニメ、映画、食べ物が好きです。クールな技術と未来が好きなだけ。RISC-V は触っていて楽しいので、neofetch 風のツールが欲しくなりました。
