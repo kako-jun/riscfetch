@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/kako-jun/riscfetch/actions/workflows/ci.yml/badge.svg)](https://github.com/kako-jun/riscfetch/actions/workflows/ci.yml)
 [![Crates.io](https://img.shields.io/crates/v/riscfetch.svg)](https://crates.io/crates/riscfetch)
-[![docs.rs](https://docs.rs/riscfetch-core/badge.svg)](https://docs.rs/riscfetch-core)
+[![docs.rs](https://img.shields.io/docsrs/riscfetch-core)](https://docs.rs/riscfetch-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [English](README.md) | [中文](README.zh-CN.md) | [日本語](README.ja.md)
