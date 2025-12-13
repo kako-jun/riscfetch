@@ -1,0 +1,40 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.2.0] - 2024-12-14
+
+### Added
+- `--explain` flag for detailed ISA extension explanations
+- `--json` flag for machine-readable JSON output
+- Shell completions (bash, zsh, fish, powershell)
+- Man page generation
+- Hardware ID display (mvendorid, marchid, mimpid)
+- VLEN detection for vector extension
+- 38 Z-extension patterns with descriptions
+
+### Changed
+- Display style: removed emojis, use neofetch-style labels
+- Separated RISC-V specific info from general system info
+- Combined hardware IDs into single line format
+- README rewritten in concise technical style
+
+### Removed
+- CLAUDE.md (keep English-only documentation)
+
+## [0.1.0] - 2024-11-28
+
+### Added
+- Initial release
+- ISA string detection from /proc/cpuinfo
+- Standard extension parsing (I, M, A, F, D, C, V)
+- Z-extension detection
+- Hart count display
+- Board detection via device-tree
+- Cache info from sysfs
+- Memory, kernel, OS, uptime display
+- Animated splash screen (`--splash`)
+- Multiple logo styles (`--logo`)
+- Simple benchmarks (`--benchmark`)
+- Pre-commit hooks (fmt, clippy)
+- CI/CD workflows

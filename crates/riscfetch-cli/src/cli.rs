@@ -1,0 +1,26 @@
+use clap::Parser;
+
+#[derive(Parser, Debug)]
+#[command(name = "riscfetch")]
+#[command(author, version, about = "RISC-V architecture information display tool", long_about = None)]
+pub struct Args {
+    /// Logo style (default, sifive, kendryte)
+    #[arg(short, long, default_value = "default")]
+    pub logo: String,
+
+    /// Run simple benchmarks
+    #[arg(short, long)]
+    pub benchmark: bool,
+
+    /// Show animated splash screen on startup
+    #[arg(short, long)]
+    pub splash: bool,
+
+    /// Show detailed explanation of each ISA extension
+    #[arg(short, long)]
+    pub explain: bool,
+
+    /// Output in JSON format (machine-readable)
+    #[arg(short, long)]
+    pub json: bool,
+}

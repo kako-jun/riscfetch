@@ -1,0 +1,15 @@
+[package]
+name = "riscfetch-core"
+version = "0.2.0"
+edition = "2021"
+authors = ["kako-jun"]
+description = "RISC-V system information library - ISA extensions, hart count, hardware IDs"
+license = "MIT"
+repository = "https://github.com/kako-jun/riscfetch"
+keywords = ["risc-v", "system-info", "hardware", "isa"]
+categories = ["hardware-support", "os"]
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+sysinfo = "0.31"

@@ -1,34 +1,11 @@
 mod benchmark;
+mod cli;
 mod display;
-mod info;
 
 use clap::Parser;
+use cli::Args;
 use colored::*;
-
-#[derive(Parser, Debug)]
-#[command(name = "riscfetch")]
-#[command(author, version, about = "RISC-V architecture information display tool", long_about = None)]
-struct Args {
-    /// Logo style (default, sifive, kendryte)
-    #[arg(short, long, default_value = "default")]
-    logo: String,
-
-    /// Run simple benchmarks
-    #[arg(short, long)]
-    benchmark: bool,
-
-    /// Show animated splash screen on startup
-    #[arg(short, long)]
-    splash: bool,
-
-    /// Show detailed explanation of each ISA extension
-    #[arg(short, long)]
-    explain: bool,
-
-    /// Output in JSON format (machine-readable)
-    #[arg(short, long)]
-    json: bool,
-}
+use riscfetch_core as info;
 
 fn main() {
     let args = Args::parse();
@@ -82,11 +59,7 @@ fn display_riscv_info(logo_style: &str, explain: bool) {
     let cache_info = info::get_cache_info();
 
     // ISA (base architecture)
-    println!(
-        "{} {}",
-        "ISA:".bright_cyan().bold(),
-        isa_string.white()
-    );
+    println!("{} {}", "ISA:".bright_cyan().bold(), isa_string.white());
 
     // Extensions
     if explain {
@@ -125,11 +98,7 @@ fn display_riscv_info(logo_style: &str, explain: bool) {
     }
 
     // Hart count
-    println!(
-        "{} {}",
-        "Harts:".bright_cyan().bold(),
-        hart_count.white()
-    );
+    println!("{} {}", "Harts:".bright_cyan().bold(), hart_count.white());
 
     // Hardware IDs (CSR values)
     if !hw_ids.mvendorid.is_empty() || !hw_ids.marchid.is_empty() || !hw_ids.mimpid.is_empty() {
@@ -152,11 +121,7 @@ fn display_riscv_info(logo_style: &str, explain: bool) {
 
     // Cache info
     if !cache_info.is_empty() {
-        println!(
-            "{} {}",
-            "Cache:".bright_cyan().bold(),
-            cache_info.white()
-        );
+        println!("{} {}", "Cache:".bright_cyan().bold(), cache_info.white());
     }
 
     // === Separator ===
@@ -173,40 +138,20 @@ fn display_riscv_info(logo_style: &str, explain: bool) {
 
     // Board/Model
     if !board_info.is_empty() {
-        println!(
-            "{} {}",
-            "Board:".bright_blue().bold(),
-            board_info.white()
-        );
+        println!("{} {}", "Board:".bright_blue().bold(), board_info.white());
     }
 
     // OS
-    println!(
-        "{} {}",
-        "OS:".bright_blue().bold(),
-        os_info.white()
-    );
+    println!("{} {}", "OS:".bright_blue().bold(), os_info.white());
 
     // Kernel
-    println!(
-        "{} {}",
-        "Kernel:".bright_blue().bold(),
-        kernel_info.white()
-    );
+    println!("{} {}", "Kernel:".bright_blue().bold(), kernel_info.white());
 
     // Memory
-    println!(
-        "{} {}",
-        "Memory:".bright_blue().bold(),
-        memory_info.white()
-    );
+    println!("{} {}", "Memory:".bright_blue().bold(), memory_info.white());
 
     // Uptime
-    println!(
-        "{} {}",
-        "Uptime:".bright_blue().bold(),
-        uptime.white()
-    );
+    println!("{} {}", "Uptime:".bright_blue().bold(), uptime.white());
 
     println!();
 }
