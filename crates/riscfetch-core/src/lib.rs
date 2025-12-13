@@ -14,53 +14,35 @@
 //! }
 //! ```
 
-use serde::Serialize;
+mod hardware;
+mod parsing;
+mod system;
+mod types;
+
+// Re-export types
+pub use types::{CacheInfo, HardwareIds, SystemInfo, VectorInfo};
+
+// Re-export parsing functions
+pub use parsing::{
+    parse_extensions_compact, parse_extensions_explained, parse_vector_from_isa,
+    parse_z_extensions, parse_z_extensions_explained,
+};
+
+// Re-export hardware functions
+pub use hardware::{
+    get_board_info, get_cache_info, get_hardware_ids, get_hart_count, get_hart_count_num,
+    get_isa_string, get_vector_detail,
+};
+
+// Re-export system functions
+pub use system::{
+    get_kernel_info, get_memory_bytes, get_memory_info, get_os_info, get_uptime,
+    get_uptime_seconds,
+};
+
 use std::fs;
 use std::process::Command;
 use sysinfo::System;
-
-/// Hardware IDs from RISC-V CSRs
-#[derive(Default, Serialize, Clone, Debug)]
-pub struct HardwareIds {
-    pub mvendorid: String,
-    pub marchid: String,
-    pub mimpid: String,
-}
-
-/// Vector extension information
-#[derive(Serialize, Default, Debug)]
-pub struct VectorInfo {
-    pub enabled: bool,
-    pub vlen: Option<u32>,
-    pub elen: Option<u32>,
-}
-
-/// Cache information
-#[derive(Serialize, Default, Debug)]
-pub struct CacheInfo {
-    pub l1d: Option<String>,
-    pub l1i: Option<String>,
-    pub l2: Option<String>,
-    pub l3: Option<String>,
-}
-
-/// Complete system information for JSON serialization
-#[derive(Serialize, Debug)]
-pub struct SystemInfo {
-    pub isa: String,
-    pub extensions: Vec<String>,
-    pub z_extensions: Vec<String>,
-    pub vector: VectorInfo,
-    pub hart_count: usize,
-    pub hardware_ids: HardwareIds,
-    pub cache: CacheInfo,
-    pub board: String,
-    pub memory_used_bytes: u64,
-    pub memory_total_bytes: u64,
-    pub kernel: String,
-    pub os: String,
-    pub uptime_seconds: u64,
-}
 
 /// Check if the current system is RISC-V architecture
 pub fn is_riscv() -> bool {
@@ -80,99 +62,9 @@ pub fn is_riscv() -> bool {
     false
 }
 
-/// Strip rv32/rv64 prefix from ISA base part to get extension letters only
-fn strip_rv_prefix(base: &str) -> &str {
-    base.strip_prefix("rv64")
-        .or_else(|| base.strip_prefix("rv32"))
-        .unwrap_or(base)
-}
-
-/// Get raw ISA string (e.g., "rv64imafdcv_zicsr_...")
-pub fn get_isa_string() -> String {
-    if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
-        for line in content.lines() {
-            if line.starts_with("isa") {
-                if let Some(isa) = line.split(':').nth(1) {
-                    return isa.trim().to_string();
-                }
-            }
-        }
-    }
-    "unknown".to_string()
-}
-
-/// Parse extensions from ISA string (pure function for testing)
-pub fn parse_extensions_compact(isa: &str) -> String {
-    let isa = isa.to_lowercase();
-    let mut exts = Vec::new();
-
-    // Get the base part before any underscore
-    let base = isa.split('_').next().unwrap_or(&isa);
-    let ext_part = strip_rv_prefix(base);
-
-    // G is shorthand for IMAFD (per RISC-V spec)
-    let has_g = ext_part.contains('g');
-
-    // Standard extensions in canonical order
-    // Note: E and I are mutually exclusive
-    let standard = [
-        ('i', "I", false), // (char, name, implied_by_g)
-        ('e', "E", false), // E = embedded (16 registers)
-        ('m', "M", true),
-        ('a', "A", true),
-        ('f', "F", true),
-        ('d', "D", true),
-        ('q', "Q", false),
-        ('c', "C", false),
-        ('b', "B", false),
-        ('v', "V", false),
-        ('h', "H", false),
-    ];
-
-    for (ch, name, implied_by_g) in standard {
-        if ext_part.contains(ch) || (has_g && implied_by_g) {
-            exts.push(name);
-        }
-    }
-
-    // If G is present but I wasn't explicitly added, add I (G implies IMAFD)
-    if has_g && !exts.contains(&"I") && !exts.contains(&"E") {
-        exts.insert(0, "I");
-    }
-
-    exts.join(" ")
-}
-
 /// Get compact extension list (e.g., "I M A F D C V")
 pub fn get_extensions_compact() -> String {
     parse_extensions_compact(&get_isa_string())
-}
-
-/// Parse Z-extensions from ISA string (pure function for testing)
-pub fn parse_z_extensions(isa: &str) -> String {
-    let isa = isa.to_lowercase();
-    let mut z_exts = Vec::new();
-
-    // Check if G is present (G implies Zicsr_Zifencei per RISC-V spec)
-    let base = isa.split('_').next().unwrap_or(&isa);
-    let ext_part = strip_rv_prefix(base);
-    let has_g = ext_part.contains('g');
-
-    // Add implied Z-extensions from G
-    if has_g {
-        z_exts.push("zicsr".to_string());
-        z_exts.push("zifencei".to_string());
-    }
-
-    // Add explicit Z-extensions and S-extensions
-    for part in isa.split('_') {
-        if (part.starts_with('z') || part.starts_with('s')) && !z_exts.contains(&part.to_string())
-        {
-            z_exts.push(part.to_string());
-        }
-    }
-
-    z_exts.join(" ")
 }
 
 /// Get Z-extensions as compact string
@@ -180,340 +72,14 @@ pub fn get_z_extensions() -> String {
     parse_z_extensions(&get_isa_string())
 }
 
-/// Standard extension definitions
-const STANDARD_EXTENSIONS: [(&char, &str, &str); 11] = [
-    (&'i', "I", "Base Integer Instructions"),
-    (&'e', "E", "Embedded (16 registers)"),
-    (&'m', "M", "Integer Multiply/Divide"),
-    (&'a', "A", "Atomic Instructions"),
-    (&'f', "F", "Single-Precision Float"),
-    (&'d', "D", "Double-Precision Float"),
-    (&'q', "Q", "Quad-Precision Float"),
-    (&'c', "C", "Compressed (16-bit)"),
-    (&'b', "B", "Bit Manipulation"),
-    (&'v', "V", "Vector (SIMD)"),
-    (&'h', "H", "Hypervisor"),
-];
-
-/// Z-extension definitions
-const Z_EXTENSIONS: [(&str, &str, &str); 38] = [
-    ("zicsr", "Zicsr", "CSR Instructions"),
-    ("zifencei", "Zifencei", "Instruction-Fetch Fence"),
-    ("zicntr", "Zicntr", "Base Counters/Timers"),
-    ("zihpm", "Zihpm", "Hardware Perf Counters"),
-    ("zicbom", "Zicbom", "Cache-Block Management"),
-    ("zicboz", "Zicboz", "Cache-Block Zero"),
-    ("zicond", "Zicond", "Conditional Operations"),
-    ("zihintpause", "Zihintpause", "Pause Hint"),
-    ("zba", "Zba", "Address Generation"),
-    ("zbb", "Zbb", "Basic Bit Manipulation"),
-    ("zbc", "Zbc", "Carry-less Multiply"),
-    ("zbs", "Zbs", "Single-bit Operations"),
-    ("zbkb", "Zbkb", "Bit Manip for Crypto"),
-    ("zbkc", "Zbkc", "Carry-less for Crypto"),
-    ("zbkx", "Zbkx", "Crossbar for Crypto"),
-    ("zfh", "Zfh", "Half-Precision Float"),
-    ("zfhmin", "Zfhmin", "Minimal Half-Precision"),
-    ("zkt", "Zkt", "Constant-Time Execution"),
-    ("zca", "Zca", "Compressed Base"),
-    ("zcb", "Zcb", "Compressed Basic Ops"),
-    ("zcd", "Zcd", "Compressed Double FP"),
-    ("zcf", "Zcf", "Compressed Single FP"),
-    ("zve32f", "Zve32f", "Vector 32-bit Float"),
-    ("zve32x", "Zve32x", "Vector 32-bit Int"),
-    ("zve64d", "Zve64d", "Vector 64-bit Double"),
-    ("zve64f", "Zve64f", "Vector 64-bit Float"),
-    ("zve64x", "Zve64x", "Vector 64-bit Int"),
-    ("zvfh", "Zvfh", "Vector Half-Precision"),
-    ("zvfhmin", "Zvfhmin", "Min Vector Half-Prec"),
-    ("zvkt", "Zvkt", "Vector Constant-Time"),
-    ("zvl128b", "Zvl128b", "VLEN >= 128 bits"),
-    ("zvl256b", "Zvl256b", "VLEN >= 256 bits"),
-    ("zvl512b", "Zvl512b", "VLEN >= 512 bits"),
-    ("svinval", "Svinval", "Fine-Grained TLB"),
-    ("svnapot", "Svnapot", "NAPOT Translation"),
-    ("svpbmt", "Svpbmt", "Page-Based Mem Types"),
-    ("sscofpmf", "Sscofpmf", "Count Overflow/Filter"),
-    ("sstc", "Sstc", "Supervisor Timer"),
-];
-
-/// Parse extensions with explanations (pure function for testing)
-pub fn parse_extensions_explained(isa: &str) -> Vec<(String, String)> {
-    let isa = isa.to_lowercase();
-    let base = isa.split('_').next().unwrap_or(&isa);
-    let ext_part = strip_rv_prefix(base);
-    let mut exts = Vec::new();
-
-    for (ch, name, desc) in STANDARD_EXTENSIONS {
-        if ext_part.contains(*ch) {
-            exts.push((name.to_string(), desc.to_string()));
-        }
-    }
-
-    exts
-}
-
 /// Get extensions with explanations
 pub fn get_extensions_explained() -> Vec<(String, String)> {
     parse_extensions_explained(&get_isa_string())
 }
 
-/// Parse Z-extensions with explanations (pure function for testing)
-pub fn parse_z_extensions_explained(isa: &str) -> Vec<(String, String)> {
-    let isa = isa.to_lowercase();
-    let mut z_exts = Vec::new();
-
-    for (pattern, name, desc) in Z_EXTENSIONS {
-        if isa.contains(pattern) {
-            z_exts.push((name.to_string(), desc.to_string()));
-        }
-    }
-
-    z_exts
-}
-
 /// Get Z-extensions with explanations
 pub fn get_z_extensions_explained() -> Vec<(String, String)> {
     parse_z_extensions_explained(&get_isa_string())
-}
-
-/// Parse vector details from ISA string (pure function for testing)
-/// Returns None if no vector extension, Some(details) otherwise
-pub fn parse_vector_from_isa(isa: &str) -> Option<String> {
-    let isa = isa.to_lowercase();
-    let base = isa.split('_').next().unwrap_or(&isa);
-    let ext_part = strip_rv_prefix(base);
-
-    // Check for V extension in the extension part, or zve in Z-extensions
-    if !ext_part.contains('v') && !isa.contains("zve") {
-        return None;
-    }
-
-    let mut details = vec!["Enabled".to_string()];
-
-    // Detect VLEN from zvl* extensions (use largest value)
-    // If no zvl* specified, VLEN is implementation-defined (do not display)
-    if isa.contains("zvl1024b") {
-        details.push("VLEN>=1024".to_string());
-    } else if isa.contains("zvl512b") {
-        details.push("VLEN>=512".to_string());
-    } else if isa.contains("zvl256b") {
-        details.push("VLEN>=256".to_string());
-    } else if isa.contains("zvl128b") {
-        details.push("VLEN>=128".to_string());
-    } else if isa.contains("zvl64b") {
-        details.push("VLEN>=64".to_string());
-    } else if isa.contains("zvl32b") {
-        details.push("VLEN>=32".to_string());
-    }
-    // No default VLEN - it's implementation-defined per RISC-V spec
-
-    Some(details.join(", "))
-}
-
-/// Get vector extension details (VLEN, ELEN)
-pub fn get_vector_detail() -> String {
-    let isa = get_isa_string();
-    let mut result = parse_vector_from_isa(&isa).unwrap_or_default();
-
-    // Try to get actual VLEN from sysfs
-    if !result.is_empty() {
-        if let Ok(vlen) = fs::read_to_string("/sys/devices/system/cpu/cpu0/riscv/vlen") {
-            result.push_str(&format!(", VLEN={}", vlen.trim()));
-        }
-    }
-
-    result
-}
-
-/// Get hardware IDs (mvendorid, marchid, mimpid)
-pub fn get_hardware_ids() -> HardwareIds {
-    let mut ids = HardwareIds::default();
-
-    if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
-        for line in content.lines() {
-            if line.starts_with("mvendorid") {
-                if let Some(val) = line.split(':').nth(1) {
-                    let val = val.trim();
-                    if !val.is_empty() && val != "0x0" {
-                        ids.mvendorid = val.to_string();
-                    }
-                }
-            } else if line.starts_with("marchid") {
-                if let Some(val) = line.split(':').nth(1) {
-                    let val = val.trim();
-                    if !val.is_empty() && val != "0x0" {
-                        ids.marchid = val.to_string();
-                    }
-                }
-            } else if line.starts_with("mimpid") {
-                if let Some(val) = line.split(':').nth(1) {
-                    let val = val.trim();
-                    if !val.is_empty() && val != "0x0" {
-                        ids.mimpid = val.to_string();
-                    }
-                }
-            }
-        }
-    }
-
-    ids
-}
-
-/// Get hart count as formatted string
-pub fn get_hart_count() -> String {
-    if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
-        let count = content
-            .lines()
-            .filter(|line| line.starts_with("processor"))
-            .count();
-        if count > 0 {
-            return format!("{count} hart{}", if count > 1 { "s" } else { "" });
-        }
-    }
-
-    let mut sys = System::new();
-    sys.refresh_cpu_all();
-    let count = sys.cpus().len();
-    format!("{count} hart{}", if count > 1 { "s" } else { "" })
-}
-
-/// Get hart count as number
-pub fn get_hart_count_num() -> usize {
-    if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
-        let count = content
-            .lines()
-            .filter(|line| line.starts_with("processor"))
-            .count();
-        if count > 0 {
-            return count;
-        }
-    }
-
-    let mut sys = System::new();
-    sys.refresh_cpu_all();
-    sys.cpus().len()
-}
-
-/// Get cache information
-pub fn get_cache_info() -> String {
-    let mut cache_parts = Vec::new();
-
-    if let Ok(l1d_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index0/size") {
-        let size = l1d_size.trim();
-        if !size.is_empty() {
-            cache_parts.push(format!("L1D:{size}"));
-        }
-    }
-
-    if let Ok(l1i_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index1/size") {
-        let size = l1i_size.trim();
-        if !size.is_empty() {
-            cache_parts.push(format!("L1I:{size}"));
-        }
-    }
-
-    if let Ok(l2_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index2/size") {
-        let size = l2_size.trim();
-        if !size.is_empty() {
-            cache_parts.push(format!("L2:{size}"));
-        }
-    }
-
-    if let Ok(l3_size) = fs::read_to_string("/sys/devices/system/cpu/cpu0/cache/index3/size") {
-        let size = l3_size.trim();
-        if !size.is_empty() {
-            cache_parts.push(format!("L3:{size}"));
-        }
-    }
-
-    cache_parts.join(" ")
-}
-
-/// Get board/model information from device tree
-pub fn get_board_info() -> String {
-    if let Ok(content) = fs::read_to_string("/proc/device-tree/model") {
-        let model = content.trim_matches('\0').trim();
-        if !model.is_empty() {
-            return model.to_string();
-        }
-    }
-
-    if let Ok(content) = fs::read_to_string("/proc/device-tree/compatible") {
-        let parts: Vec<&str> = content.split('\0').collect();
-        if let Some(first) = parts.first() {
-            if !first.is_empty() {
-                return first.to_string();
-            }
-        }
-    }
-
-    String::new()
-}
-
-/// Get memory usage as formatted string
-pub fn get_memory_info() -> String {
-    let mut sys = System::new();
-    sys.refresh_memory();
-
-    let total_mem = sys.total_memory();
-    let used_mem = sys.used_memory();
-
-    let total_gb = total_mem as f64 / 1_073_741_824.0;
-    let used_gb = used_mem as f64 / 1_073_741_824.0;
-
-    format!("{used_gb:.2} GiB / {total_gb:.2} GiB")
-}
-
-/// Get memory information as bytes
-pub fn get_memory_bytes() -> (u64, u64) {
-    let mut sys = System::new();
-    sys.refresh_memory();
-    (sys.used_memory(), sys.total_memory())
-}
-
-/// Get kernel version
-pub fn get_kernel_info() -> String {
-    if let Ok(output) = Command::new("uname").arg("-r").output() {
-        let kernel = String::from_utf8_lossy(&output.stdout).trim().to_string();
-        if !kernel.is_empty() {
-            return kernel;
-        }
-    }
-    "Unknown".to_string()
-}
-
-/// Get OS name from /etc/os-release
-pub fn get_os_info() -> String {
-    if let Ok(content) = fs::read_to_string("/etc/os-release") {
-        for line in content.lines() {
-            if line.starts_with("PRETTY_NAME=") {
-                if let Some(name) = line.split('=').nth(1) {
-                    return name.trim_matches('"').to_string();
-                }
-            }
-        }
-    }
-
-    "Linux".to_string()
-}
-
-/// Get uptime as formatted string
-pub fn get_uptime() -> String {
-    let uptime_secs = System::uptime();
-    let hours = uptime_secs / 3600;
-    let minutes = (uptime_secs % 3600) / 60;
-
-    if hours > 0 {
-        format!("{hours}h {minutes}m")
-    } else {
-        format!("{minutes}m")
-    }
-}
-
-/// Get uptime in seconds
-pub fn get_uptime_seconds() -> u64 {
-    System::uptime()
 }
 
 /// Collect all information into a single struct
@@ -643,7 +209,6 @@ mod tests {
     #[test]
     fn test_parse_z_extensions_explained_spacemit() {
         let result = parse_z_extensions_explained(ISA_SPACEMIT_K1);
-        // Check some known extensions are found with correct descriptions
         assert!(result
             .iter()
             .any(|(n, d)| n == "Zba" && d == "Address Generation"));
@@ -745,18 +310,13 @@ mod tests {
 
     // =======================================================
     // Specification-based tests (from SPEC.md)
-    // These tests define EXPECTED behavior, not current behavior
     // =======================================================
 
     mod spec_tests {
-        use super::super::*;
-
-        // --- parse_extensions_compact ---
-        // Reference: SPEC.md "parse_extensions_compact" section
+        use super::*;
 
         #[test]
         fn spec_g_expansion() {
-            // G is shorthand for IMAFD per RISC-V spec
             assert_eq!(parse_extensions_compact("rv64gc"), "I M A F D C");
         }
 
@@ -767,7 +327,6 @@ mod tests {
 
         #[test]
         fn spec_e_extension() {
-            // E = embedded (16 registers), mutually exclusive with I
             assert_eq!(parse_extensions_compact("rv32e"), "E");
         }
 
@@ -788,21 +347,13 @@ mod tests {
 
         #[test]
         fn spec_rv64_prefix_not_vector() {
-            // The 'v' in 'rv64' must NOT be detected as Vector
             let result = parse_extensions_compact("rv64imafdc");
-            assert!(
-                !result.contains("V"),
-                "rv64 prefix should not trigger V detection"
-            );
+            assert!(!result.contains("V"));
         }
 
         #[test]
         fn spec_z_extensions_ignored() {
-            // Z-extensions after underscore should not affect base extensions
-            assert_eq!(
-                parse_extensions_compact("rv64imafdc_zba_zbb"),
-                "I M A F D C"
-            );
+            assert_eq!(parse_extensions_compact("rv64imafdc_zba_zbb"), "I M A F D C");
         }
 
         #[test]
@@ -817,12 +368,8 @@ mod tests {
 
         #[test]
         fn spec_rv64_only() {
-            // No extensions specified = no output
             assert_eq!(parse_extensions_compact("rv64"), "");
         }
-
-        // --- parse_z_extensions ---
-        // Reference: SPEC.md "parse_z_extensions" section
 
         #[test]
         fn spec_z_extensions_basic() {
@@ -836,7 +383,6 @@ mod tests {
 
         #[test]
         fn spec_s_extensions() {
-            // S-extensions should also be included
             let result = parse_z_extensions("rv64i_sstc");
             assert!(result.contains("sstc"));
         }
@@ -848,26 +394,20 @@ mod tests {
 
         #[test]
         fn spec_z_extensions_g_implies() {
-            // G implies Zicsr_Zifencei per RISC-V spec
             assert_eq!(parse_z_extensions("rv64gc"), "zicsr zifencei");
         }
 
         #[test]
         fn spec_z_extensions_case() {
-            // Output should be lowercase
             let result = parse_z_extensions("rv64i_Zicsr");
             assert_eq!(result, "zicsr");
         }
-
-        // --- parse_vector_from_isa ---
-        // Reference: SPEC.md "parse_vector_from_isa" section
 
         #[test]
         fn spec_vector_with_v() {
             let result = parse_vector_from_isa("rv64imafdcv");
             assert!(result.is_some());
-            let detail = result.unwrap();
-            assert!(detail.contains("Enabled"));
+            assert!(result.unwrap().contains("Enabled"));
         }
 
         #[test]
@@ -878,7 +418,6 @@ mod tests {
 
         #[test]
         fn spec_vector_zve() {
-            // Zve* implies vector support
             let result = parse_vector_from_isa("rv64imac_zve32x");
             assert!(result.is_some());
         }
@@ -892,7 +431,6 @@ mod tests {
 
         #[test]
         fn spec_vector_vlen_largest() {
-            // Multiple zvl* should use largest
             let result = parse_vector_from_isa("rv64imafdcv_zvl128b_zvl256b");
             assert!(result.is_some());
             assert!(result.unwrap().contains("VLEN>=256"));
@@ -900,12 +438,70 @@ mod tests {
 
         #[test]
         fn spec_vector_no_default_vlen() {
-            // V without zvl*: VLEN is implementation-defined, not displayed
             let result = parse_vector_from_isa("rv64imafdcv");
             assert!(result.is_some());
             let detail = result.unwrap();
             assert!(detail.contains("Enabled"));
-            assert!(!detail.contains("VLEN"), "VLEN should not be shown without zvl*");
+            assert!(!detail.contains("VLEN"));
+        }
+    }
+
+    // =======================================================
+    // RISC-V Hardware Tests (only run on actual RISC-V)
+    // =======================================================
+
+    #[cfg(target_arch = "riscv64")]
+    mod riscv_hardware_tests {
+        use super::*;
+
+        #[test]
+        fn hw_is_riscv() {
+            assert!(is_riscv());
+        }
+
+        #[test]
+        fn hw_isa_string_valid() {
+            let isa = get_isa_string();
+            assert!(isa.starts_with("rv64") || isa.starts_with("rv32"));
+        }
+
+        #[test]
+        fn hw_isa_string_has_base() {
+            let isa = get_isa_string();
+            assert!(isa.contains('i') || isa.contains('e'));
+        }
+
+        #[test]
+        fn hw_extensions_not_empty() {
+            let ext = get_extensions_compact();
+            assert!(!ext.is_empty());
+            assert!(ext.contains('I') || ext.contains('E'));
+        }
+
+        #[test]
+        fn hw_hart_count_positive() {
+            let hart_str = get_hart_count();
+            assert!(hart_str.contains("hart"));
+            let num: String = hart_str.chars().take_while(|c| c.is_ascii_digit()).collect();
+            let count: usize = num.parse().unwrap_or(0);
+            assert!(count > 0);
+        }
+
+        #[test]
+        fn hw_hardware_ids_present() {
+            let ids = get_hardware_ids();
+            let has_any = !ids.mvendorid.is_empty()
+                || !ids.marchid.is_empty()
+                || !ids.mimpid.is_empty();
+            assert!(has_any);
+        }
+
+        #[test]
+        fn hw_collect_all_info() {
+            let info = collect_all_info();
+            assert!(!info.isa.is_empty());
+            assert!(!info.extensions.is_empty());
+            assert!(info.hart_count > 0);
         }
     }
 }
