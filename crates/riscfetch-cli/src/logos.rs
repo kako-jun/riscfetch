@@ -108,10 +108,26 @@ fn generate_figlet_logo(vendor: LogoVendor) -> String {
             let name = vendor.display_name();
             match font.convert(name) {
                 Some(figure) => {
+                    let fig_str = figure.to_string();
+                    // Get the width of the first non-empty line
+                    let logo_width = fig_str
+                        .lines()
+                        .filter(|l| !l.trim().is_empty())
+                        .map(|l| l.len())
+                        .max()
+                        .unwrap_or(0);
+
+                    let subtitle = vendor.subtitle();
+                    let padding = if logo_width > subtitle.len() {
+                        (logo_width - subtitle.len()) / 2
+                    } else {
+                        0
+                    };
+
                     let mut result = String::new();
                     result.push('\n');
-                    result.push_str(&figure.to_string());
-                    result.push_str(&format!("       {}\n", vendor.subtitle()));
+                    result.push_str(&fig_str);
+                    result.push_str(&format!("{:>width$}\n", subtitle, width = padding + subtitle.len()));
                     result
                 }
                 None => fallback_logo(vendor),
