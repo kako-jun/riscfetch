@@ -59,6 +59,17 @@ Uptime: 3h 42m
 
 riscfetch shows RISC-V specific info. Use with fastfetch for full system details.
 
+## Contributing
+
+Issues and pull requests are welcome!
+
+- Bug reports
+- Feature requests
+- Support for new RISC-V boards
+- Documentation improvements
+
+If you have access to RISC-V hardware, testing on real devices is especially appreciated.
+
 ## License
 
 MIT
