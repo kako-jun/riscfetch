@@ -20,7 +20,8 @@ riscfetch [OPTIONS]
 | `-j` | `--json` | Output in JSON format |
 | `-s` | `--splash` | Show animated splash screen |
 | `-b` | `--benchmark` | Run ISA-specific benchmarks |
-| `-l` | `--logo <STYLE>` | Logo style: default, sifive, kendryte |
+| `-l` | `--logo <VENDOR>` | Vendor logo (see Supported Vendors below) |
+| | `--style <STYLE>` | Logo style: normal, small, none |
 | `-h` | `--help` | Show help message |
 | `-V` | `--version` | Show version |
 
@@ -200,13 +201,29 @@ Total score: 1234
 
 ---
 
-## Logo Styles (--logo)
+## Vendor Logos (--logo)
+
+| Vendor | Description |
+|--------|-------------|
+| default | Generic RISC-V logo |
+| sifive | SiFive (HiFive Unmatched, Unleashed) |
+| starfive | StarFive (VisionFive 2) |
+| kendryte | Kendryte/Canaan (K210, K510) |
+| allwinner | Allwinner (D1) |
+| espressif | Espressif (ESP32-C3, C6) |
+| spacemit | SpacemiT (K1, Orange Pi RV2) |
+| thead | T-Head/Alibaba (XuanTie C906, C910) |
+| milkv | Milk-V (Duo, Mars, Pioneer) |
+| sipeed | Sipeed (Lichee, Maix series) |
+| sophgo | Sophgo (CV1800B, SG2000) |
+
+## Logo Styles (--style)
 
 | Style | Description |
 |-------|-------------|
-| default | Standard RISC-V logo |
-| sifive | SiFive style |
-| kendryte | Kendryte style |
+| normal | Full ASCII art logo (default) |
+| small | Compact one-line logo |
+| none | No logo, data only |
 
 ---
 
@@ -218,18 +235,19 @@ Must include:
 - Brief description of each option
 
 ```
-RISC-V architecture information display tool - Show off your RISC-V setup!
+RISC-V architecture information display tool
 
 Usage: riscfetch [OPTIONS]
 
 Options:
-  -l, --logo <STYLE>  Logo style [default: default] [possible values: default, sifive, kendryte]
-  -b, --benchmark     Run ISA-specific benchmarks
-  -s, --splash        Show animated splash
-  -e, --explain       Show detailed explanation of ISA extensions
-  -j, --json          Output in JSON format
-  -h, --help          Print help
-  -V, --version       Print version
+  -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, kendryte, allwinner, espressif, spacemit, thead, milkv, sipeed, sophgo)
+      --style <STYLE>   Logo style (normal, small, none)
+  -b, --benchmark       Run simple benchmarks
+  -s, --splash          Show animated splash screen on startup
+  -e, --explain         Show detailed explanation of each ISA extension
+  -j, --json            Output in JSON format (machine-readable)
+  -h, --help            Print help
+  -V, --version         Print version
 ```
 
 ---
@@ -282,5 +300,5 @@ Example: `riscfetch 0.2.0`
 
 ## Version
 
-- Spec version: 1.0
-- Last updated: 2024-12
+- Spec version: 1.1
+- Last updated: 2025-12

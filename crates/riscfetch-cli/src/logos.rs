@@ -1,9 +1,8 @@
-//! Logo definitions for RISC-V vendors and styles
+//! Logo generation using figlet-rs
 //!
-//! To add a new vendor logo:
-//! 1. Add a new constant below (e.g., `LOGO_NEWVENDOR`)
-//! 2. Add the variant to `LogoVendor` enum
-//! 3. Add the match arm in `get_vendor_logo()`
+//! Dynamically generates ASCII art logos for vendors using FIGlet fonts.
+
+use figlet_rs::FIGfont;
 
 /// Available vendor logos
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -45,6 +44,40 @@ impl LogoVendor {
             _ => Self::Default,
         }
     }
+
+    /// Get the display name for this vendor
+    fn display_name(&self) -> &'static str {
+        match self {
+            Self::Default => "RISC-V",
+            Self::SiFive => "SiFive",
+            Self::StarFive => "StarFive",
+            Self::Kendryte => "Kendryte",
+            Self::Allwinner => "Allwinner",
+            Self::Espressif => "Espressif",
+            Self::SpacemiT => "SpacemiT",
+            Self::THead => "T-Head",
+            Self::MilkV => "Milk-V",
+            Self::Sipeed => "Sipeed",
+            Self::Sophgo => "Sophgo",
+        }
+    }
+
+    /// Get the subtitle for this vendor
+    fn subtitle(&self) -> &'static str {
+        match self {
+            Self::Default => "Architecture Info",
+            Self::SiFive => "RISC-V by SiFive",
+            Self::StarFive => "RISC-V by StarFive",
+            Self::Kendryte => "RISC-V by Kendryte",
+            Self::Allwinner => "RISC-V by Allwinner",
+            Self::Espressif => "RISC-V by Espressif",
+            Self::SpacemiT => "RISC-V by SpacemiT",
+            Self::THead => "RISC-V by T-Head",
+            Self::MilkV => "RISC-V by Milk-V",
+            Self::Sipeed => "RISC-V by Sipeed",
+            Self::Sophgo => "RISC-V by Sophgo",
+        }
+    }
 }
 
 impl LogoStyle {
@@ -57,235 +90,42 @@ impl LogoStyle {
     }
 }
 
-/// Get logo for the specified vendor
-pub fn get_vendor_logo(vendor: LogoVendor) -> &'static str {
-    match vendor {
-        LogoVendor::Default => LOGO_DEFAULT,
-        LogoVendor::SiFive => LOGO_SIFIVE,
-        LogoVendor::StarFive => LOGO_STARFIVE,
-        LogoVendor::Kendryte => LOGO_KENDRYTE,
-        LogoVendor::Allwinner => LOGO_ALLWINNER,
-        LogoVendor::Espressif => LOGO_ESPRESSIF,
-        LogoVendor::SpacemiT => LOGO_SPACEMIT,
-        LogoVendor::THead => LOGO_THEAD,
-        LogoVendor::MilkV => LOGO_MILKV,
-        LogoVendor::Sipeed => LOGO_SIPEED,
-        LogoVendor::Sophgo => LOGO_SOPHGO,
+/// Generate ASCII art logo for the specified vendor
+pub fn generate_logo(vendor: LogoVendor, style: LogoStyle) -> String {
+    match style {
+        LogoStyle::None => String::new(),
+        LogoStyle::Small => format!("  {} - {}", vendor.display_name(), vendor.subtitle()),
+        LogoStyle::Normal => generate_figlet_logo(vendor),
     }
 }
 
-/// Get small logo for the specified vendor
-pub fn get_vendor_logo_small(vendor: LogoVendor) -> &'static str {
-    match vendor {
-        LogoVendor::Default => LOGO_DEFAULT_SMALL,
-        LogoVendor::SiFive => LOGO_SIFIVE_SMALL,
-        LogoVendor::StarFive => LOGO_STARFIVE_SMALL,
-        LogoVendor::Kendryte => LOGO_KENDRYTE_SMALL,
-        LogoVendor::Allwinner => LOGO_ALLWINNER_SMALL,
-        LogoVendor::Espressif => LOGO_ESPRESSIF_SMALL,
-        LogoVendor::SpacemiT => LOGO_SPACEMIT_SMALL,
-        LogoVendor::THead => LOGO_THEAD_SMALL,
-        LogoVendor::MilkV => LOGO_MILKV_SMALL,
-        LogoVendor::Sipeed => LOGO_SIPEED_SMALL,
-        LogoVendor::Sophgo => LOGO_SOPHGO_SMALL,
+/// Generate FIGlet ASCII art logo
+fn generate_figlet_logo(vendor: LogoVendor) -> String {
+    let standard_font = FIGfont::standard();
+
+    match standard_font {
+        Ok(font) => {
+            let name = vendor.display_name();
+            match font.convert(name) {
+                Some(figure) => {
+                    let mut result = String::new();
+                    result.push('\n');
+                    result.push_str(&figure.to_string());
+                    result.push_str(&format!("       {}\n", vendor.subtitle()));
+                    result
+                }
+                None => fallback_logo(vendor),
+            }
+        }
+        Err(_) => fallback_logo(vendor),
     }
 }
 
-// =============================================================================
-// Default RISC-V Logo
-// =============================================================================
-
-const LOGO_DEFAULT: &str = r#"
-      ____  ____  ____   ____      __  __
-     / __ \/_  _\/ ___\ / ___|    / / / /
-    / /_/ / / /  \___ \/ /   ____/ / / /
-   / _, _/ / /  /___/ / /___/___/ /_/ /
-  /_/ |_| /_/  /_____/\____/    \____/
-
-        RISC-V Architecture Info
-"#;
-
-const LOGO_DEFAULT_SMALL: &str = r#"
-  RISC-V
-"#;
-
-// =============================================================================
-// SiFive (USA) - HiFive Unmatched, HiFive Unleashed
-// =============================================================================
-
-const LOGO_SIFIVE: &str = r#"
-   _____ _ ______ _
-  / ____(_)  ____(_)
- | (___  _| |__   ___   _____
-  \___ \| |  __| | \ \ / / _ \
-  ____) | | |    | |\ V /  __/
- |_____/|_|_|    |_| \_/ \___|
-
-      RISC-V by SiFive
-"#;
-
-const LOGO_SIFIVE_SMALL: &str = r#"
-  SiFive RISC-V
-"#;
-
-// =============================================================================
-// StarFive (China) - VisionFive, VisionFive 2
-// =============================================================================
-
-const LOGO_STARFIVE: &str = r#"
-  ____  _              _____ _
- / ___|| |_ __ _ _ __ |  ___(_)_   _____
- \___ \| __/ _` | '__|| |_  | \ \ / / _ \
-  ___) | || (_| | |   |  _| | |\ V /  __/
- |____/ \__\__,_|_|   |_|   |_| \_/ \___|
-
-      RISC-V by StarFive
-"#;
-
-const LOGO_STARFIVE_SMALL: &str = r#"
-  StarFive RISC-V
-"#;
-
-// =============================================================================
-// Kendryte/Canaan (China) - K210, K510
-// =============================================================================
-
-const LOGO_KENDRYTE: &str = r#"
-  _  __              _            _
- | |/ /___ _ __   __| |_ __ _   _| |_ ___
- | ' // _ \ '_ \ / _` | '__| | | | __/ _ \
- | . \  __/ | | | (_| | |  | |_| | ||  __/
- |_|\_\___|_| |_|\__,_|_|   \__, |\__\___|
-                            |___/
-      RISC-V by Kendryte
-"#;
-
-const LOGO_KENDRYTE_SMALL: &str = r#"
-  Kendryte RISC-V
-"#;
-
-// =============================================================================
-// Allwinner (China) - D1 chip
-// =============================================================================
-
-const LOGO_ALLWINNER: &str = r#"
-     _    _ _         _
-    / \  | | |_      _(_)_ __  _ __   ___ _ __
-   / _ \ | | \ \ /\ / / | '_ \| '_ \ / _ \ '__|
-  / ___ \| | |\ V  V /| | | | | | | |  __/ |
- /_/   \_\_|_| \_/\_/ |_|_| |_|_| |_|\___|_|
-
-      RISC-V by Allwinner
-"#;
-
-const LOGO_ALLWINNER_SMALL: &str = r#"
-  Allwinner RISC-V
-"#;
-
-// =============================================================================
-// Espressif (China) - ESP32-C3, ESP32-C6
-// =============================================================================
-
-const LOGO_ESPRESSIF: &str = r#"
-  _____                         _  __
- | ____|___ _ __  _ __ ___  ___(_)/ _|
- |  _| / __| '_ \| '__/ _ \/ __| | |_
- | |___\__ \ |_) | | |  __/\__ \ |  _|
- |_____|___/ .__/|_|  \___||___/_|_|
-           |_|
-      RISC-V by Espressif
-"#;
-
-const LOGO_ESPRESSIF_SMALL: &str = r#"
-  Espressif RISC-V
-"#;
-
-// =============================================================================
-// SpacemiT (China) - K1 chip (Orange Pi RV2, BananaPi BPI-F3)
-// =============================================================================
-
-const LOGO_SPACEMIT: &str = r#"
-  ____                           _ _____
- / ___| _ __   __ _  ___ ___ _ __ (_)_   _|
- \___ \| '_ \ / _` |/ __/ _ \ '_ \| | | |
-  ___) | |_) | (_| | (_|  __/ | | | | | |
- |____/| .__/ \__,_|\___\___|_| |_|_| |_|
-       |_|
-      RISC-V by SpacemiT
-"#;
-
-const LOGO_SPACEMIT_SMALL: &str = r#"
-  SpacemiT RISC-V
-"#;
-
-// =============================================================================
-// T-Head/Alibaba (China) - XuanTie C906, C910
-// =============================================================================
-
-const LOGO_THEAD: &str = r#"
-  _____ _   _                _
- |_   _| | | | ___  __ _  __| |
-   | | | |_| |/ _ \/ _` |/ _` |
-   | | |  _  |  __/ (_| | (_| |
-   |_| |_| |_|\___|\__,_|\__,_|
-
-      RISC-V by T-Head
-"#;
-
-const LOGO_THEAD_SMALL: &str = r#"
-  T-Head RISC-V
-"#;
-
-// =============================================================================
-// Milk-V (China) - Milk-V Duo, Mars, Pioneer
-// =============================================================================
-
-const LOGO_MILKV: &str = r#"
-  __  __ _ _ _     __     __
- |  \/  (_) | | __ \ \   / /
- | |\/| | | | |/ /  \ \ / /
- | |  | | | |   <    \ V /
- |_|  |_|_|_|_|\_\    \_/
-
-      RISC-V by Milk-V
-"#;
-
-const LOGO_MILKV_SMALL: &str = r#"
-  Milk-V RISC-V
-"#;
-
-// =============================================================================
-// Sipeed (China) - Lichee, Maix series
-// =============================================================================
-
-const LOGO_SIPEED: &str = r#"
-  ____  _                     _
- / ___|(_)_ __   ___  ___  __| |
- \___ \| | '_ \ / _ \/ _ \/ _` |
-  ___) | | |_) |  __/  __/ (_| |
- |____/|_| .__/ \___|\___|\__,_|
-         |_|
-      RISC-V by Sipeed
-"#;
-
-const LOGO_SIPEED_SMALL: &str = r#"
-  Sipeed RISC-V
-"#;
-
-// =============================================================================
-// Sophgo (China) - CV1800B, SG2000
-// =============================================================================
-
-const LOGO_SOPHGO: &str = r#"
-  ____              _
- / ___|  ___  _ __ | |__   __ _  ___
- \___ \ / _ \| '_ \| '_ \ / _` |/ _ \
-  ___) | (_) | |_) | | | | (_| | (_) |
- |____/ \___/| .__/|_| |_|\__, |\___/
-             |_|          |___/
-      RISC-V by Sophgo
-"#;
-
-const LOGO_SOPHGO_SMALL: &str = r#"
-  Sophgo RISC-V
-"#;
+/// Fallback if FIGlet fails
+fn fallback_logo(vendor: LogoVendor) -> String {
+    format!(
+        "\n  === {} ===\n       {}\n",
+        vendor.display_name(),
+        vendor.subtitle()
+    )
+}

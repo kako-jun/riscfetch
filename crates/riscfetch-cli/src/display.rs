@@ -1,4 +1,4 @@
-use crate::logos::{get_vendor_logo, get_vendor_logo_small, LogoStyle, LogoVendor};
+use crate::logos::{generate_logo, LogoStyle, LogoVendor};
 use colored::*;
 use std::io::{self, Write};
 use std::thread;
@@ -8,13 +8,10 @@ pub fn display_logo(vendor: &str, style: &str) {
     let vendor = LogoVendor::from_str(vendor);
     let style = LogoStyle::from_str(style);
 
-    let logo = match style {
-        LogoStyle::None => return,
-        LogoStyle::Small => get_vendor_logo_small(vendor),
-        LogoStyle::Normal => get_vendor_logo(vendor),
-    };
-
-    println!("{}", logo.bright_cyan().bold());
+    let logo = generate_logo(vendor, style);
+    if !logo.is_empty() {
+        println!("{}", logo.bright_cyan().bold());
+    }
 }
 
 pub fn show_splash_animation() {

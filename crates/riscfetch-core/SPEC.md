@@ -228,5 +228,5 @@ parse_extensions_compact("rv64gc") → "I M A F D C"  (not "G C")
 ## Version
 
 - Spec version: 1.0
-- Last updated: 2024-12
+- Last updated: 2025-12
 - Based on RISC-V ISA spec version: 20240411
