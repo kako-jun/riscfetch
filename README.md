@@ -5,6 +5,8 @@
 [![docs.rs](https://docs.rs/riscfetch-core/badge.svg)](https://docs.rs/riscfetch-core)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[English](README.md) | [中文](README.zh-CN.md) | [日本語](README.ja.md)
+
 System information tool for RISC-V. Displays ISA extensions, hart count, hardware IDs, and more.
 
 **RISC-V only.** Exits on other architectures.
