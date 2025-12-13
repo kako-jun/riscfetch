@@ -129,3 +129,85 @@ fn fallback_logo(vendor: LogoVendor) -> String {
         vendor.subtitle()
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_vendor_from_str() {
+        assert_eq!(LogoVendor::from_str("default"), LogoVendor::Default);
+        assert_eq!(LogoVendor::from_str("sifive"), LogoVendor::SiFive);
+        assert_eq!(LogoVendor::from_str("SIFIVE"), LogoVendor::SiFive);
+        assert_eq!(LogoVendor::from_str("starfive"), LogoVendor::StarFive);
+        assert_eq!(LogoVendor::from_str("kendryte"), LogoVendor::Kendryte);
+        assert_eq!(LogoVendor::from_str("canaan"), LogoVendor::Kendryte);
+        assert_eq!(LogoVendor::from_str("espressif"), LogoVendor::Espressif);
+        assert_eq!(LogoVendor::from_str("esp"), LogoVendor::Espressif);
+        assert_eq!(LogoVendor::from_str("spacemit"), LogoVendor::SpacemiT);
+        assert_eq!(LogoVendor::from_str("thead"), LogoVendor::THead);
+        assert_eq!(LogoVendor::from_str("t-head"), LogoVendor::THead);
+        assert_eq!(LogoVendor::from_str("milkv"), LogoVendor::MilkV);
+        assert_eq!(LogoVendor::from_str("milk-v"), LogoVendor::MilkV);
+        assert_eq!(LogoVendor::from_str("unknown"), LogoVendor::Default);
+    }
+
+    #[test]
+    fn test_style_from_str() {
+        assert_eq!(LogoStyle::from_str("normal"), LogoStyle::Normal);
+        assert_eq!(LogoStyle::from_str("small"), LogoStyle::Small);
+        assert_eq!(LogoStyle::from_str("compact"), LogoStyle::Small);
+        assert_eq!(LogoStyle::from_str("none"), LogoStyle::None);
+        assert_eq!(LogoStyle::from_str("off"), LogoStyle::None);
+        assert_eq!(LogoStyle::from_str("unknown"), LogoStyle::Normal);
+    }
+
+    #[test]
+    fn test_generate_logo_none_style() {
+        let logo = generate_logo(LogoVendor::Default, LogoStyle::None);
+        assert!(logo.is_empty());
+    }
+
+    #[test]
+    fn test_generate_logo_small_style() {
+        let logo = generate_logo(LogoVendor::Default, LogoStyle::Small);
+        assert!(logo.contains("RISC-V"));
+        assert!(logo.contains("Architecture Info"));
+    }
+
+    #[test]
+    fn test_generate_logo_small_vendor() {
+        let logo = generate_logo(LogoVendor::SiFive, LogoStyle::Small);
+        assert!(logo.contains("SiFive"));
+        assert!(logo.contains("RISC-V by SiFive"));
+    }
+
+    #[test]
+    fn test_generate_logo_normal_not_empty() {
+        let logo = generate_logo(LogoVendor::Default, LogoStyle::Normal);
+        assert!(!logo.is_empty());
+        assert!(logo.contains("Architecture Info"));
+    }
+
+    #[test]
+    fn test_all_vendors_have_logos() {
+        let vendors = [
+            LogoVendor::Default,
+            LogoVendor::SiFive,
+            LogoVendor::StarFive,
+            LogoVendor::Kendryte,
+            LogoVendor::Allwinner,
+            LogoVendor::Espressif,
+            LogoVendor::SpacemiT,
+            LogoVendor::THead,
+            LogoVendor::MilkV,
+            LogoVendor::Sipeed,
+            LogoVendor::Sophgo,
+        ];
+
+        for vendor in vendors {
+            let logo = generate_logo(vendor, LogoStyle::Normal);
+            assert!(!logo.is_empty(), "Logo for {:?} should not be empty", vendor);
+        }
+    }
+}
