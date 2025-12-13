@@ -1,6 +1,7 @@
 mod benchmark;
 mod cli;
 mod display;
+mod logos;
 
 use clap::Parser;
 use cli::Args;
@@ -28,7 +29,7 @@ fn main() {
         display::show_splash_animation();
     }
 
-    display_riscv_info(&args.logo, args.explain);
+    display_riscv_info(&args.logo, &args.style, args.explain);
 
     if args.benchmark {
         println!();
@@ -44,9 +45,9 @@ fn output_json() {
     );
 }
 
-fn display_riscv_info(logo_style: &str, explain: bool) {
+fn display_riscv_info(vendor: &str, style: &str, explain: bool) {
     println!();
-    display::display_logo(logo_style);
+    display::display_logo(vendor, style);
     println!();
 
     // === RISC-V Specific Information ===

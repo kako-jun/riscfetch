@@ -1,56 +1,20 @@
+use crate::logos::{get_vendor_logo, get_vendor_logo_small, LogoStyle, LogoVendor};
 use colored::*;
 use std::io::{self, Write};
 use std::thread;
 use std::time::Duration;
 
-pub fn display_logo(style: &str) {
+pub fn display_logo(vendor: &str, style: &str) {
+    let vendor = LogoVendor::from_str(vendor);
+    let style = LogoStyle::from_str(style);
+
     let logo = match style {
-        "sifive" => get_sifive_logo(),
-        "kendryte" => get_kendryte_logo(),
-        _ => get_default_logo(),
+        LogoStyle::None => return,
+        LogoStyle::Small => get_vendor_logo_small(vendor),
+        LogoStyle::Normal => get_vendor_logo(vendor),
     };
 
     println!("{}", logo.bright_cyan().bold());
-}
-
-fn get_default_logo() -> String {
-    r#"
-      ____  ____  ____   ____      __  __
-     / __ \/_  _\/ ___\ / ___|    / / / /
-    / /_/ / / /  \___ \/ /   ____/ / / /
-   / _, _/ / /  /___/ / /___/___/ /_/ /
-  /_/ |_| /_/  /_____/\____/    \____/
-
-        RISC-V Architecture Info
-"#
-    .to_string()
-}
-
-fn get_sifive_logo() -> String {
-    r#"
-   _____ _ ______ _
-  / ____(_)  ____(_)
- | (___  _| |__   ___   _____
-  \___ \| |  __| | \ \ / / _ \
-  ____) | | |    | |\ V /  __/
- |_____/|_|_|    |_| \_/ \___|
-
-      RISC-V by SiFive
-"#
-    .to_string()
-}
-
-fn get_kendryte_logo() -> String {
-    r#"
-  _  __              _            _
- | |/ /___ _ __   __| |_ __ _   _| |_ ___
- | ' // _ \ '_ \ / _` | '__| | | | __/ _ \
- | . \  __/ | | | (_| | |  | |_| | ||  __/
- |_|\_\___|_| |_|\__,_|_|   \__, |\__\___|
-                            |___/
-      RISC-V by Kendryte
-"#
-    .to_string()
 }
 
 pub fn show_splash_animation() {

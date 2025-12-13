@@ -2,10 +2,7 @@ use colored::*;
 use std::time::Instant;
 
 pub fn run_benchmarks() {
-    println!(
-        "{}",
-        "Running RISC-V Benchmarks...".bright_yellow().bold()
-    );
+    println!("{}", "Running RISC-V Benchmarks...".bright_yellow().bold());
     println!();
 
     // Integer multiplication benchmark (M extension)

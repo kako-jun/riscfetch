@@ -4,9 +4,13 @@ use clap::Parser;
 #[command(name = "riscfetch")]
 #[command(author, version, about = "RISC-V architecture information display tool", long_about = None)]
 pub struct Args {
-    /// Logo style (default, sifive, kendryte)
+    /// Vendor logo (default, sifive, starfive, kendryte, allwinner, espressif, spacemit, thead, milkv, sipeed, sophgo)
     #[arg(short, long, default_value = "default")]
     pub logo: String,
+
+    /// Logo style (normal, small, none)
+    #[arg(long, default_value = "normal")]
+    pub style: String,
 
     /// Run simple benchmarks
     #[arg(short, long)]

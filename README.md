@@ -57,7 +57,24 @@ Uptime: 3h 42m
 | `-j, --json` | Machine-readable JSON output |
 | `-s, --splash` | Animated startup |
 | `-b, --benchmark` | ISA-specific benchmarks |
-| `-l, --logo <STYLE>` | Logo style: default, sifive, kendryte |
+| `-l, --logo <VENDOR>` | Vendor logo (see below) |
+| `--style <STYLE>` | Logo style: normal, small, none |
+
+### Supported Vendors
+
+| Vendor | Description |
+|--------|-------------|
+| `default` | Generic RISC-V logo |
+| `sifive` | SiFive (HiFive Unmatched, Unleashed) |
+| `starfive` | StarFive (VisionFive 2) |
+| `kendryte` | Kendryte/Canaan (K210, K510) |
+| `allwinner` | Allwinner (D1) |
+| `espressif` | Espressif (ESP32-C3, C6) |
+| `spacemit` | SpacemiT (K1, Orange Pi RV2) |
+| `thead` | T-Head/Alibaba (XuanTie C906, C910) |
+| `milkv` | Milk-V (Duo, Mars, Pioneer) |
+| `sipeed` | Sipeed (Lichee, Maix series) |
+| `sophgo` | Sophgo (CV1800B, SG2000) |
 
 ## Complements fastfetch
 
