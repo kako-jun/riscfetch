@@ -42,6 +42,7 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # 标准输出
+riscfetch -r           # 仅显示 RISC-V 特定信息（排除 OS、内存等）
 riscfetch -e           # 解释每个 ISA 扩展
 riscfetch -j           # JSON 输出
 riscfetch -s           # 动画启动画面
@@ -73,6 +74,7 @@ User:   user@visionfive2
 
 | 参数 | 说明 |
 |------|------|
+| `-r, --riscv-only` | 仅显示 RISC-V 特定信息（排除 OS、内存、运行时间） |
 | `-e, --explain` | 显示每个扩展的含义 |
 | `-j, --json` | 机器可读的 JSON 输出 |
 | `-s, --splash` | 动画启动画面 |
@@ -98,7 +100,11 @@ User:   user@visionfive2
 
 ## 配合 fastfetch 使用
 
-riscfetch 显示 RISC-V 特定信息。配合 fastfetch 使用可获取完整系统信息。
+riscfetch 显示 RISC-V 特定信息。配合 fastfetch 使用可获取完整系统信息：
+
+```bash
+fastfetch && riscfetch -r
+```
 
 ## 贡献
 

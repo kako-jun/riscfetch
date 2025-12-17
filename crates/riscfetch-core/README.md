@@ -31,7 +31,8 @@ if is_riscv() {
 | `get_hardware_ids()` | HardwareIds struct |
 | `get_hart_count()` | Formatted string "N harts" |
 | `get_cache_info()` | L1D/L1I/L2/L3 sizes |
-| `collect_all_info()` | SystemInfo struct (JSON-serializable) |
+| `collect_riscv_info()` | RiscvInfo struct (RISC-V specific only) |
+| `collect_all_info()` | SystemInfo struct (includes system info) |
 
 ## License
 

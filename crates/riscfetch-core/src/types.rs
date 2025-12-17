@@ -27,6 +27,18 @@ pub struct CacheInfo {
     pub l3: Option<String>,
 }
 
+/// RISC-V specific information only (excludes generic system info)
+#[derive(Serialize, Debug)]
+pub struct RiscvInfo {
+    pub isa: String,
+    pub extensions: Vec<String>,
+    pub z_extensions: Vec<String>,
+    pub vector: VectorInfo,
+    pub hart_count: usize,
+    pub hardware_ids: HardwareIds,
+    pub cache: CacheInfo,
+}
+
 /// Complete system information for JSON serialization
 #[derive(Serialize, Debug)]
 pub struct SystemInfo {

@@ -27,4 +27,8 @@ pub struct Args {
     /// Output in JSON format (machine-readable)
     #[arg(short, long)]
     pub json: bool,
+
+    /// Show only RISC-V specific info (exclude generic system info like OS, memory, uptime)
+    #[arg(short, long)]
+    pub riscv_only: bool,
 }

@@ -42,6 +42,7 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # 標準出力
+riscfetch -r           # RISC-V 固有情報のみ（OS、メモリ等を除外）
 riscfetch -e           # 各 ISA 拡張の説明を表示
 riscfetch -j           # JSON 出力
 riscfetch -s           # アニメーション付きスプラッシュ
@@ -73,6 +74,7 @@ User:   user@visionfive2
 
 | フラグ | 説明 |
 |--------|------|
+| `-r, --riscv-only` | RISC-V 固有情報のみ表示（OS、メモリ、稼働時間を除外） |
 | `-e, --explain` | 各拡張の意味を表示 |
 | `-j, --json` | 機械可読な JSON 出力 |
 | `-s, --splash` | アニメーション付きスプラッシュ |
@@ -98,7 +100,11 @@ User:   user@visionfive2
 
 ## fastfetch との併用
 
-riscfetch は RISC-V 固有の情報を表示します。完全なシステム情報には fastfetch と併用してください。
+riscfetch は RISC-V 固有の情報を表示します。完全なシステム情報には fastfetch と併用してください：
+
+```bash
+fastfetch && riscfetch -r
+```
 
 ## コントリビューション
 

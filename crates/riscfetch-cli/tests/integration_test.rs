@@ -87,4 +87,33 @@ fn test_short_flags() {
     assert!(stdout.contains("-s"));
     assert!(stdout.contains("-b"));
     assert!(stdout.contains("-l"));
+    assert!(stdout.contains("-r"));
+}
+
+#[test]
+fn test_riscv_only_flag_exists() {
+    let output = Command::new("cargo")
+        .args(["run", "--", "--help"])
+        .output()
+        .expect("Failed to execute command");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("--riscv-only"));
+    assert!(stdout.contains("RISC-V specific info"));
+}
+
+#[test]
+fn test_riscv_only_json_non_riscv() {
+    let output = Command::new("cargo")
+        .args(["run", "--", "--json", "--riscv-only"])
+        .output()
+        .expect("Failed to execute command");
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    // On non-RISC-V, JSON error should be returned even with --riscv-only
+    if !output.status.success() {
+        assert!(stdout.contains(r#""error""#));
+        assert!(stdout.contains(r#""not_riscv""#));
+    }
 }

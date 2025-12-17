@@ -20,7 +20,7 @@ mod system;
 mod types;
 
 // Re-export types
-pub use types::{CacheInfo, HardwareIds, SystemInfo, VectorInfo};
+pub use types::{CacheInfo, HardwareIds, RiscvInfo, SystemInfo, VectorInfo};
 
 // Re-export parsing functions
 pub use parsing::{
@@ -79,6 +79,40 @@ pub fn get_extensions_explained() -> Vec<(String, String)> {
 /// Get Z-extensions with explanations
 pub fn get_z_extensions_explained() -> Vec<(String, String)> {
     parse_z_extensions_explained(&get_isa_string())
+}
+
+/// Collect RISC-V specific information only (excludes generic system info)
+pub fn collect_riscv_info() -> RiscvInfo {
+    let mut sys = System::new();
+    sys.refresh_cpu_all();
+
+    let isa = get_isa_string();
+    let exts: Vec<String> = get_extensions_explained()
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+    let z_exts: Vec<String> = get_z_extensions_explained()
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+
+    let hw_ids = get_hardware_ids();
+    let isa_lower = isa.to_lowercase();
+    let base = isa_lower.split('_').next().unwrap_or(&isa_lower);
+
+    RiscvInfo {
+        isa,
+        extensions: exts,
+        z_extensions: z_exts,
+        vector: VectorInfo {
+            enabled: base.contains('v') || isa_lower.contains("zve"),
+            vlen: None,
+            elen: None,
+        },
+        hart_count: sys.cpus().len(),
+        hardware_ids: hw_ids,
+        cache: CacheInfo::default(),
+    }
 }
 
 /// Collect all information into a single struct
@@ -506,6 +540,30 @@ mod tests {
             assert!(!info.isa.is_empty());
             assert!(!info.extensions.is_empty());
             assert!(info.hart_count > 0);
+        }
+
+        #[test]
+        fn hw_collect_riscv_info() {
+            let info = collect_riscv_info();
+            assert!(!info.isa.is_empty());
+            assert!(!info.extensions.is_empty());
+            assert!(info.hart_count > 0);
+        }
+
+        #[test]
+        fn hw_riscv_info_excludes_system_fields() {
+            let riscv_info = collect_riscv_info();
+            let all_info = collect_all_info();
+
+            // RiscvInfo should have the same RISC-V specific fields
+            assert_eq!(riscv_info.isa, all_info.isa);
+            assert_eq!(riscv_info.extensions, all_info.extensions);
+            assert_eq!(riscv_info.z_extensions, all_info.z_extensions);
+            assert_eq!(riscv_info.hart_count, all_info.hart_count);
+
+            // SystemInfo has additional fields that RiscvInfo doesn't have
+            // (board, memory_*, kernel, os, uptime_seconds)
+            // This is verified by the type system - RiscvInfo simply doesn't have these fields
         }
     }
 }

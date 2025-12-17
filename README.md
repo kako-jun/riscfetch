@@ -42,6 +42,7 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # standard output
+riscfetch -r           # RISC-V info only (no OS, memory, etc.)
 riscfetch -e           # explain each ISA extension
 riscfetch -j           # JSON output
 riscfetch -s           # animated splash
@@ -73,6 +74,7 @@ User:   user@visionfive2
 
 | Flag | Description |
 |------|-------------|
+| `-r, --riscv-only` | Show only RISC-V specific info (exclude OS, memory, uptime) |
 | `-e, --explain` | Show meaning of each extension |
 | `-j, --json` | Machine-readable JSON output |
 | `-s, --splash` | Animated startup |
@@ -98,7 +100,11 @@ User:   user@visionfive2
 
 ## Complements fastfetch
 
-riscfetch shows RISC-V specific info. Use with fastfetch for full system details.
+riscfetch shows RISC-V specific info. Use with fastfetch for full system details:
+
+```bash
+fastfetch && riscfetch -r
+```
 
 ## Contributing
 

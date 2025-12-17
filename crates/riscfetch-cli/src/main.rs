@@ -21,7 +21,7 @@ fn main() {
     }
 
     if args.json {
-        output_json();
+        output_json(args.riscv_only);
         return;
     }
 
@@ -29,7 +29,7 @@ fn main() {
         display::show_splash_animation();
     }
 
-    display_riscv_info(&args.logo, &args.style, args.explain);
+    display_riscv_info(&args.logo, &args.style, args.explain, args.riscv_only);
 
     if args.benchmark {
         println!();
@@ -37,15 +37,23 @@ fn main() {
     }
 }
 
-fn output_json() {
-    let data = info::collect_all_info();
-    println!(
-        "{}",
-        serde_json::to_string_pretty(&data).unwrap_or_else(|_| "{}".to_string())
-    );
+fn output_json(riscv_only: bool) {
+    if riscv_only {
+        let data = info::collect_riscv_info();
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&data).unwrap_or_else(|_| "{}".to_string())
+        );
+    } else {
+        let data = info::collect_all_info();
+        println!(
+            "{}",
+            serde_json::to_string_pretty(&data).unwrap_or_else(|_| "{}".to_string())
+        );
+    }
 }
 
-fn display_riscv_info(vendor: &str, style: &str, explain: bool) {
+fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool) {
     println!();
     display::display_logo(vendor, style);
     println!();
@@ -123,6 +131,12 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool) {
     // Cache info
     if !cache_info.is_empty() {
         println!("{} {}", "Cache:".bright_cyan().bold(), cache_info.white());
+    }
+
+    // Skip general system info if --riscv-only flag is set
+    if riscv_only {
+        println!();
+        return;
     }
 
     // === Separator ===
