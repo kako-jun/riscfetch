@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2025-12-17
+
+### Added
+- `--riscv-only` (`-r`) flag to show only RISC-V specific info
+- `RiscvInfo` struct and `collect_riscv_info()` in core library
+- Integration tests for the new flag
+
+### Changed
+- JSON output respects `--riscv-only` flag (excludes OS, memory, uptime fields)
+
+## [1.0.0] - 2024-12-15
+
+### Changed
+- Stable release
+
 ## [0.2.0] - 2024-12-14
 
 ### Added
