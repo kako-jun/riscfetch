@@ -50,9 +50,12 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # standard output
+riscfetch -a           # show all 144 extensions with ✓/✗
+riscfetch -a -e        # all extensions with descriptions
 riscfetch -r           # RISC-V info only (no OS, memory, etc.)
 riscfetch -e           # explain each ISA extension
 riscfetch -j           # JSON output
+riscfetch -a -j        # JSON with all extensions
 riscfetch -s           # animated splash
 riscfetch -b           # run benchmarks
 riscfetch -l pine64    # use Pine64 logo

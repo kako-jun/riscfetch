@@ -50,9 +50,12 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # 標準出力
+riscfetch -a           # 全144拡張を ✓/✗ で表示
+riscfetch -a -e        # 全拡張を説明付きで表示
 riscfetch -r           # RISC-V 固有情報のみ（OS、メモリ等を除外）
 riscfetch -e           # 各 ISA 拡張の説明を表示
 riscfetch -j           # JSON 出力
+riscfetch -a -j        # 全拡張を JSON 出力
 riscfetch -s           # アニメーション付きスプラッシュ
 riscfetch -b           # ベンチマーク実行
 riscfetch -l pine64    # Pine64 ロゴを使用
