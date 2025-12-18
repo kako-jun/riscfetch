@@ -2,6 +2,7 @@ mod benchmark;
 mod cli;
 mod display;
 mod logos;
+mod vendors;
 
 use clap::Parser;
 use cli::Args;

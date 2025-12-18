@@ -263,14 +263,16 @@ Total score: 1234
 | default | Generic RISC-V logo |
 | sifive | SiFive (HiFive Unmatched, Unleashed) |
 | starfive | StarFive (VisionFive 2) |
+| thead | T-Head/Alibaba (XuanTie C906, C910) |
+| milkv | Milk-V (Duo, Mars, Pioneer) |
+| sipeed | Sipeed (Lichee, Maix series) |
+| pine64 | Pine64 (Star64, Oz64) |
 | kendryte | Kendryte/Canaan (K210, K510) |
 | allwinner | Allwinner (D1) |
 | espressif | Espressif (ESP32-C3, C6) |
 | spacemit | SpacemiT (K1, Orange Pi RV2) |
-| thead | T-Head/Alibaba (XuanTie C906, C910) |
-| milkv | Milk-V (Duo, Mars, Pioneer) |
-| sipeed | Sipeed (Lichee, Maix series) |
 | sophgo | Sophgo (CV1800B, SG2000) |
+| wch | WCH (CH32V003, CH32V103) |
 
 ## Logo Styles (--style)
 
@@ -295,7 +297,7 @@ RISC-V architecture information display tool
 Usage: riscfetch [OPTIONS]
 
 Options:
-  -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, kendryte, allwinner, espressif, spacemit, thead, milkv, sipeed, sophgo)
+  -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, kendryte, allwinner, espressif, spacemit, sophgo, wch)
       --style <STYLE>   Logo style (normal, small, none)
   -b, --benchmark       Run simple benchmarks
   -s, --splash          Show animated splash screen on startup

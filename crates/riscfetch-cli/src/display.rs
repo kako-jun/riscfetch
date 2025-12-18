@@ -1,11 +1,10 @@
-use crate::logos::{generate_logo, LogoStyle, LogoVendor};
+use crate::logos::{generate_logo, LogoStyle};
 use colored::{Color, Colorize};
 use std::io::{self, Write};
 use std::thread;
 use std::time::Duration;
 
 pub fn display_logo(vendor: &str, style: &str) {
-    let vendor = LogoVendor::from_str(vendor);
     let style = LogoStyle::from_str(style);
 
     let logo = generate_logo(vendor, style);

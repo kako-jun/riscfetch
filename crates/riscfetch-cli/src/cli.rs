@@ -5,7 +5,7 @@ use clap::Parser;
 #[command(author, version, about = "RISC-V architecture information display tool", long_about = None)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Args {
-    /// Vendor logo (default, sifive, starfive, kendryte, allwinner, espressif, spacemit, thead, milkv, sipeed, sophgo)
+    /// Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, kendryte, allwinner, espressif, spacemit, sophgo, wch)
     #[arg(short, long, default_value = "default")]
     pub logo: String,
 
