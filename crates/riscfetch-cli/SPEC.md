@@ -214,7 +214,7 @@ Z-Extensions (Base):
  ...
 ```
 
-The `--all` flag can be combined with other options (`-e`, `-l`, etc.).
+The `--all` flag can be combined with other options (`-e`, `-l`, `-j`, `-r`, etc.).
 
 ---
 
@@ -262,6 +262,47 @@ The `--all` flag can be combined with other options (`-e`, `-l`, etc.).
   "message": "This tool only runs on RISC-V architecture"
 }
 ```
+
+---
+
+## Output Format (--all --json Mode)
+
+When `--all` is combined with `--json`, extensions include ALL defined extensions with a `supported` field:
+
+```json
+{
+  "isa": "rv64imafdc_zicsr_zifencei_zba_zbb",
+  "extensions": [
+    {"name": "I", "description": "Base Integer Instructions", "supported": true},
+    {"name": "E", "description": "Embedded (16 registers)", "supported": false},
+    {"name": "M", "description": "Integer Multiply/Divide", "supported": true},
+    ...
+  ],
+  "z_extensions": [
+    {"name": "Zicsr", "description": "CSR Instructions", "category": "base", "supported": true},
+    {"name": "Zifencei", "description": "Instruction-Fetch Fence", "category": "base", "supported": true},
+    {"name": "Zicntr", "description": "Base Counters/Timers", "category": "base", "supported": false},
+    ...
+  ],
+  "s_extensions": [
+    {"name": "Sstc", "description": "Supervisor Timer", "category": "sup", "supported": true},
+    {"name": "Svinval", "description": "Fine-Grained Invalidation", "category": "vm", "supported": false},
+    ...
+  ],
+  "vector": "Enabled, VLEN>=256",
+  "hart_count": 8,
+  "hardware_ids": {...},
+  "cache": "L1D:32K L1I:32K L2:512K",
+  "board": "SpacemiT K1",
+  "memory_used_bytes": 3707764736,
+  "memory_total_bytes": 8589934592,
+  "kernel": "6.1.15-riscv64",
+  "os": "Ubuntu 24.04 LTS",
+  "uptime_seconds": 13320
+}
+```
+
+With `--riscv-only` (`-a -r -j`), system fields (board, memory, kernel, os, uptime) are omitted.
 
 ---
 

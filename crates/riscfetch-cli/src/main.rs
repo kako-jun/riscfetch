@@ -22,7 +22,7 @@ fn main() {
     }
 
     if args.json {
-        output_json(args.riscv_only);
+        output_json(args.riscv_only, args.all);
         return;
     }
 
@@ -38,8 +38,10 @@ fn main() {
     }
 }
 
-fn output_json(riscv_only: bool) {
-    if riscv_only {
+fn output_json(riscv_only: bool, show_all: bool) {
+    if show_all {
+        output_json_all(riscv_only);
+    } else if riscv_only {
         let data = info::collect_riscv_info();
         println!(
             "{}",
@@ -52,6 +54,84 @@ fn output_json(riscv_only: bool) {
             serde_json::to_string_pretty(&data).unwrap_or_else(|_| "{}".to_string())
         );
     }
+}
+
+fn output_json_all(riscv_only: bool) {
+    use serde_json::json;
+
+    let isa_string = info::get_isa_string();
+    let all_std = info::get_all_standard_extensions_with_status(&isa_string);
+    let all_z = info::get_all_z_extensions_with_status(&isa_string);
+    let all_s = info::get_all_s_extensions_with_status(&isa_string);
+
+    let std_json: Vec<_> = all_std
+        .iter()
+        .map(|(name, desc, supported)| {
+            json!({
+                "name": name,
+                "description": desc,
+                "supported": supported
+            })
+        })
+        .collect();
+
+    let z_json: Vec<_> = all_z
+        .iter()
+        .map(|e| {
+            json!({
+                "name": e.name,
+                "description": e.description,
+                "category": e.category,
+                "supported": e.supported
+            })
+        })
+        .collect();
+
+    let s_json: Vec<_> = all_s
+        .iter()
+        .map(|e| {
+            json!({
+                "name": e.name,
+                "description": e.description,
+                "category": e.category,
+                "supported": e.supported
+            })
+        })
+        .collect();
+
+    let hw_ids = info::get_hardware_ids();
+    let vector_info = info::get_vector_detail();
+    let cache_info = info::get_cache_info();
+
+    let mut output = json!({
+        "isa": isa_string,
+        "extensions": std_json,
+        "z_extensions": z_json,
+        "s_extensions": s_json,
+        "vector": vector_info,
+        "hart_count": info::get_hart_count_num(),
+        "hardware_ids": {
+            "mvendorid": hw_ids.mvendorid,
+            "marchid": hw_ids.marchid,
+            "mimpid": hw_ids.mimpid
+        },
+        "cache": cache_info
+    });
+
+    if !riscv_only {
+        let (mem_used, mem_total) = info::get_memory_bytes();
+        output["board"] = json!(info::get_board_info());
+        output["memory_used_bytes"] = json!(mem_used);
+        output["memory_total_bytes"] = json!(mem_total);
+        output["kernel"] = json!(info::get_kernel_info());
+        output["os"] = json!(info::get_os_info());
+        output["uptime_seconds"] = json!(info::get_uptime_seconds());
+    }
+
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&output).unwrap_or_else(|_| "{}".to_string())
+    );
 }
 
 fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool, show_all: bool) {
