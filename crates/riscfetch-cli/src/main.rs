@@ -30,7 +30,13 @@ fn main() {
         display::show_splash_animation();
     }
 
-    display_riscv_info(&args.logo, &args.style, args.explain, args.riscv_only, args.all);
+    display_riscv_info(
+        &args.logo,
+        &args.style,
+        args.explain,
+        args.riscv_only,
+        args.all,
+    );
 
     if args.benchmark {
         println!();
