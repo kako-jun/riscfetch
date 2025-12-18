@@ -90,6 +90,7 @@ User:       user@visionfive2
 |------|-------------|
 | `-r, --riscv-only` | Show only RISC-V specific info (exclude OS, memory, uptime) |
 | `-e, --explain` | Show meaning of each extension |
+| `-a, --all` | Show all 144 extensions with ✓/✗ checkmarks |
 | `-j, --json` | Machine-readable JSON output |
 | `-s, --splash` | Animated startup |
 | `-b, --benchmark` | ISA-specific benchmarks |

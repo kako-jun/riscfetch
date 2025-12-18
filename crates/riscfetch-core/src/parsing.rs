@@ -4,12 +4,13 @@ use crate::extensions::{
     STANDARD_EXTENSIONS, S_CATEGORY_NAMES, S_EXTENSIONS, Z_CATEGORY_NAMES, Z_EXTENSIONS,
 };
 
-/// Extension info with category
+/// Extension info with category and support status
 #[derive(Debug, Clone)]
 pub struct ExtensionInfo {
     pub name: String,
     pub description: String,
     pub category: String,
+    pub supported: bool,
 }
 
 /// Strip rv32/rv64 prefix from ISA base part to get extension letters only
@@ -170,11 +171,13 @@ pub fn parse_z_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
             name: "Zicsr".to_string(),
             description: "CSR Instructions".to_string(),
             category: "base".to_string(),
+            supported: true,
         });
         z_exts.push(ExtensionInfo {
             name: "Zifencei".to_string(),
             description: "Instruction-Fetch Fence".to_string(),
             category: "base".to_string(),
+            supported: true,
         });
     }
 
@@ -186,6 +189,7 @@ pub fn parse_z_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
                     name: name.to_string(),
                     description: desc.to_string(),
                     category: category.to_string(),
+                    supported: true,
                 });
             }
         }
@@ -206,6 +210,7 @@ pub fn parse_s_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
                 name: name.to_string(),
                 description: desc.to_string(),
                 category: category.to_string(),
+                supported: true,
             });
         }
     }
@@ -242,6 +247,66 @@ pub fn group_by_category(extensions: &[ExtensionInfo]) -> Vec<(String, Vec<&Exte
     }
 
     groups.into_iter().collect()
+}
+
+/// Get ALL Z-extensions with support status based on ISA string
+#[must_use]
+pub fn get_all_z_extensions_with_status(isa: &str) -> Vec<ExtensionInfo> {
+    let isa = isa.to_lowercase();
+    let base = isa.split('_').next().unwrap_or(&isa);
+    let ext_part = strip_rv_prefix(base);
+    let has_g = ext_part.contains('g');
+
+    Z_EXTENSIONS
+        .iter()
+        .map(|&(pattern, name, desc, category)| {
+            let supported =
+                isa.contains(pattern) || (has_g && (pattern == "zicsr" || pattern == "zifencei"));
+            ExtensionInfo {
+                name: name.to_string(),
+                description: desc.to_string(),
+                category: category.to_string(),
+                supported,
+            }
+        })
+        .collect()
+}
+
+/// Get ALL S-extensions with support status based on ISA string
+#[must_use]
+pub fn get_all_s_extensions_with_status(isa: &str) -> Vec<ExtensionInfo> {
+    let isa = isa.to_lowercase();
+
+    S_EXTENSIONS
+        .iter()
+        .map(|&(pattern, name, desc, category)| {
+            let supported = isa.contains(pattern);
+            ExtensionInfo {
+                name: name.to_string(),
+                description: desc.to_string(),
+                category: category.to_string(),
+                supported,
+            }
+        })
+        .collect()
+}
+
+/// Get ALL standard extensions with support status
+#[must_use]
+pub fn get_all_standard_extensions_with_status(isa: &str) -> Vec<(String, String, bool)> {
+    let isa = isa.to_lowercase();
+    let base = isa.split('_').next().unwrap_or(&isa);
+    let ext_part = strip_rv_prefix(base);
+    let has_g = ext_part.contains('g');
+
+    STANDARD_EXTENSIONS
+        .iter()
+        .map(|&(char, name, desc)| {
+            let supported =
+                ext_part.contains(char) || (has_g && matches!(char, 'i' | 'm' | 'a' | 'f' | 'd'));
+            (name.to_string(), desc.to_string(), supported)
+        })
+        .collect()
 }
 
 /// Parse vector details from ISA string (pure function for testing)

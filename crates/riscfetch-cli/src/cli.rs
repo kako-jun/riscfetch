@@ -32,4 +32,8 @@ pub struct Args {
     /// Show only RISC-V specific info (exclude generic system info like OS, memory, uptime)
     #[arg(short, long)]
     pub riscv_only: bool,
+
+    /// Show all extensions with checkmarks for supported ones
+    #[arg(short, long)]
+    pub all: bool,
 }

@@ -90,6 +90,7 @@ User:       user@visionfive2
 |--------|------|
 | `-r, --riscv-only` | RISC-V 固有情報のみ表示（OS、メモリ、稼働時間を除外） |
 | `-e, --explain` | 各拡張の意味を表示 |
+| `-a, --all` | 全144拡張を ✓/✗ チェックマーク付きで表示 |
 | `-j, --json` | 機械可読な JSON 出力 |
 | `-s, --splash` | アニメーション付きスプラッシュ |
 | `-b, --benchmark` | ISA 固有のベンチマーク |

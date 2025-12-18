@@ -90,6 +90,7 @@ User:       user@visionfive2
 |------|------|
 | `-r, --riscv-only` | 仅显示 RISC-V 特定信息（排除 OS、内存、运行时间） |
 | `-e, --explain` | 显示每个扩展的含义 |
+| `-a, --all` | 显示全部 144 种扩展，带 ✓/✗ 标记 |
 | `-j, --json` | 机器可读的 JSON 输出 |
 | `-s, --splash` | 动画启动画面 |
 | `-b, --benchmark` | ISA 特定基准测试 |

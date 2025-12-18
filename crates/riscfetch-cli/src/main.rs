@@ -30,7 +30,7 @@ fn main() {
         display::show_splash_animation();
     }
 
-    display_riscv_info(&args.logo, &args.style, args.explain, args.riscv_only);
+    display_riscv_info(&args.logo, &args.style, args.explain, args.riscv_only, args.all);
 
     if args.benchmark {
         println!();
@@ -54,16 +54,13 @@ fn output_json(riscv_only: bool) {
     }
 }
 
-fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool) {
+fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool, show_all: bool) {
     println!();
     display::display_logo(vendor, style);
     println!();
 
     // === RISC-V Specific Information ===
     let isa_string = info::get_isa_string();
-    let extensions_compact = info::get_extensions_compact();
-    let z_exts_with_cat = info::get_z_extensions_with_category();
-    let s_exts_with_cat = info::get_s_extensions_with_category();
     let vector_info = info::get_vector_detail();
     let hart_count = info::get_hart_count();
     let hw_ids = info::get_hardware_ids();
@@ -73,12 +70,28 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool
     println!("{} {}", "ISA:".bright_cyan().bold(), isa_string.white());
 
     // Extensions
-    if explain {
-        // Detailed mode with category groups and aligned columns
-        display_extensions_explained(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
+    if show_all {
+        // Show ALL extensions with checkmarks
+        let all_std = info::get_all_standard_extensions_with_status(&isa_string);
+        let all_z = info::get_all_z_extensions_with_status(&isa_string);
+        let all_s = info::get_all_s_extensions_with_status(&isa_string);
+
+        if explain {
+            display_all_extensions_explained(&all_std, &all_z, &all_s);
+        } else {
+            display_all_extensions_compact(&all_std, &all_z, &all_s);
+        }
     } else {
-        // Compact mode with category groups
-        display_extensions_compact(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
+        // Show only detected extensions
+        let extensions_compact = info::get_extensions_compact();
+        let z_exts_with_cat = info::get_z_extensions_with_category();
+        let s_exts_with_cat = info::get_s_extensions_with_category();
+
+        if explain {
+            display_extensions_explained(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
+        } else {
+            display_extensions_compact(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
+        }
     }
 
     // Vector extension
@@ -240,6 +253,147 @@ fn display_extensions_explained(
         );
         for ext in exts {
             println!("  {:<10} {}", ext.name.bright_green(), ext.description);
+        }
+    }
+}
+
+/// Format extension with checkmark based on support status
+fn format_ext_with_check(name: &str, supported: bool) -> String {
+    if supported {
+        format!("{}{}", "✓".bright_green().bold(), name.bright_green())
+    } else {
+        format!("{}{}", "✗".bright_black(), name.bright_black())
+    }
+}
+
+/// Display ALL extensions in compact mode with checkmarks
+fn display_all_extensions_compact(
+    std_exts: &[(String, String, bool)],
+    z_exts: &[info::ExtensionInfo],
+    s_exts: &[info::ExtensionInfo],
+) {
+    // Standard extensions with checkmarks
+    let std_parts: Vec<String> = std_exts
+        .iter()
+        .map(|(name, _, supported)| format_ext_with_check(name, *supported))
+        .collect();
+    println!("{} {}", "Ext:".bright_yellow().bold(), std_parts.join(" "));
+
+    // Z-extensions grouped by category
+    let z_groups = info::group_by_category(z_exts);
+    for (category, exts) in &z_groups {
+        let cat_name = info::get_z_category_name(category);
+        let ext_parts: Vec<String> = exts
+            .iter()
+            .map(|e| format_ext_with_check(&e.name, e.supported))
+            .collect();
+        println!(
+            "{} {}",
+            format!("Z-{cat_name}:").bright_yellow().bold(),
+            ext_parts.join(" ")
+        );
+    }
+
+    // S-extensions grouped by category
+    let s_groups = info::group_by_category(s_exts);
+    for (category, exts) in &s_groups {
+        let cat_name = info::get_s_category_name(category);
+        let ext_parts: Vec<String> = exts
+            .iter()
+            .map(|e| format_ext_with_check(&e.name, e.supported))
+            .collect();
+        println!(
+            "{} {}",
+            format!("S-{cat_name}:").bright_magenta().bold(),
+            ext_parts.join(" ")
+        );
+    }
+}
+
+/// Display ALL extensions in explained mode with checkmarks
+fn display_all_extensions_explained(
+    std_exts: &[(String, String, bool)],
+    z_exts: &[info::ExtensionInfo],
+    s_exts: &[info::ExtensionInfo],
+) {
+    // Standard extensions
+    println!("{}", "Extensions:".bright_yellow().bold());
+    for (name, desc, supported) in std_exts {
+        let mark = if *supported {
+            "✓".bright_green().bold()
+        } else {
+            "✗".bright_black()
+        };
+        let name_colored = if *supported {
+            name.bright_green()
+        } else {
+            name.bright_black()
+        };
+        let desc_colored = if *supported {
+            desc.normal()
+        } else {
+            desc.bright_black()
+        };
+        println!(" {mark} {name_colored:<10} {desc_colored}");
+    }
+
+    // Z-extensions grouped by category
+    let z_groups = info::group_by_category(z_exts);
+    for (category, exts) in &z_groups {
+        let cat_name = info::get_z_category_name(category);
+        println!();
+        println!(
+            "{}",
+            format!("Z-Extensions ({cat_name}):").bright_yellow().bold()
+        );
+        for ext in exts {
+            let mark = if ext.supported {
+                "✓".bright_green().bold()
+            } else {
+                "✗".bright_black()
+            };
+            let name_colored = if ext.supported {
+                ext.name.bright_green()
+            } else {
+                ext.name.bright_black()
+            };
+            let desc_colored = if ext.supported {
+                ext.description.normal()
+            } else {
+                ext.description.bright_black()
+            };
+            println!(" {mark} {name_colored:<10} {desc_colored}");
+        }
+    }
+
+    // S-extensions grouped by category
+    let s_groups = info::group_by_category(s_exts);
+    for (category, exts) in &s_groups {
+        let cat_name = info::get_s_category_name(category);
+        println!();
+        println!(
+            "{}",
+            format!("S-Extensions ({cat_name}):")
+                .bright_magenta()
+                .bold()
+        );
+        for ext in exts {
+            let mark = if ext.supported {
+                "✓".bright_green().bold()
+            } else {
+                "✗".bright_black()
+            };
+            let name_colored = if ext.supported {
+                ext.name.bright_green()
+            } else {
+                ext.name.bright_black()
+            };
+            let desc_colored = if ext.supported {
+                ext.description.normal()
+            } else {
+                ext.description.bright_black()
+            };
+            println!(" {mark} {name_colored:<10} {desc_colored}");
         }
     }
 }

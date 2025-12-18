@@ -18,6 +18,7 @@ riscfetch [OPTIONS]
 |-------|------|-------------|
 | `-e` | `--explain` | Show detailed explanation of each ISA extension |
 | `-j` | `--json` | Output in JSON format |
+| `-a` | `--all` | Show all extensions with checkmarks for supported ones |
 | `-s` | `--splash` | Show animated splash screen |
 | `-b` | `--benchmark` | Run ISA-specific benchmarks |
 | `-l` | `--logo <VENDOR>` | Vendor logo (see Supported Vendors below) |
@@ -180,6 +181,43 @@ S-Extensions (Supervisor):
 
 ---
 
+## Output Format (--all Mode)
+
+Shows ALL defined extensions (144 total) with checkmarks indicating support status:
+
+- `✓` (green, bold) = Supported by this CPU
+- `✗` (gray/dim) = Not supported
+
+### Compact mode (`-a`)
+
+```
+Ext:        ✓I ✗E ✓M ✓A ✓F ✓D ✗Q ✓C ✗B ✗V ✗H
+Z-Base:     ✓Zicsr ✓Zifencei ✗Zicntr ✗Zihpm
+Z-Bit:      ✓Zba ✓Zbb ✗Zbc ✓Zbs
+Z-Cache:    ✗Zicbom ✗Zicboz ✗Zicbop
+...
+```
+
+### Explained mode (`-a -e`)
+
+```
+Extensions:
+ ✓ I          Base Integer Instructions
+ ✗ E          Embedded (16 registers)
+ ✓ M          Integer Multiply/Divide
+ ...
+
+Z-Extensions (Base):
+ ✓ Zicsr      CSR Instructions
+ ✓ Zifencei   Instruction-Fetch Fence
+ ✗ Zicntr     Base Counters/Timers
+ ...
+```
+
+The `--all` flag can be combined with other options (`-e`, `-l`, etc.).
+
+---
+
 ## Output Format (--json Mode)
 
 ### Success (on RISC-V)
@@ -303,6 +341,7 @@ Options:
   -s, --splash          Show animated splash screen on startup
   -e, --explain         Show detailed explanation of each ISA extension
   -j, --json            Output in JSON format (machine-readable)
+  -a, --all             Show all extensions with checkmarks for supported ones
   -h, --help            Print help
   -V, --version         Print version
 ```
