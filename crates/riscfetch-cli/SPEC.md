@@ -63,23 +63,29 @@ Sorry, not RISC-V
 
 ### Standard Output
 
+Extensions are grouped by category for better readability:
+
 ```
-ISA:    rv64imafdc_zicsr_zifencei_zba_zbb
-Ext:    I M A F D C
-Z-Ext:  zicsr zifencei zba zbb
-Vector: Not detected
-Harts:  4 harts
-HW IDs: vendor:0x489 arch:0x8000000000000007 impl:0x0
-Cache:  L1D:32K L1I:32K L2:2048K
+ISA:        rv64imafdcv_zicbom_zicboz_zicntr_zicsr_zifencei_...
+Ext:        I M A F D C V
+Z-Base:     Zicsr Zifencei Zicntr Zihpm
+Z-Bit:      Zba Zbb Zbc Zbs
+Z-Cache:    Zicbom Zicboz
+Z-Vector:   Zvl128b Zvl256b
+S-Sup:      Sstc
+Vector:     Enabled, VLEN>=256
+Harts:      8 harts
+HW IDs:     vendor:0x710 arch:0x8000000000000007 impl:0x0
+Cache:      L1D:32K L1I:32K L2:512K
 
 --------------------------------
 
-Board:  StarFive VisionFive 2
-OS:     Ubuntu 24.04 LTS
-Kernel: 6.8.0-riscv64
-Memory: 3.45 GiB / 8.00 GiB
-Uptime: 3h 42m
-User:   user@visionfive2
+Board:      SpacemiT K1
+OS:         Ubuntu 24.04 LTS
+Kernel:     6.1.15-riscv64
+Memory:     3.45 GiB / 8.00 GiB
+Uptime:     3h 42m
+User:       user@spacemit
 ```
 
 ### Field Definitions
@@ -88,17 +94,45 @@ User:   user@visionfive2
 |-------|-------------|---------|
 | ISA | Full ISA string from /proc/cpuinfo | `rv64imafdc_zicsr_zifencei` |
 | Ext | Standard extensions (space-separated) | `I M A F D C V` |
-| Z-Ext | Z-extensions (space-separated) | `zicsr zifencei zba zbb` |
-| Vector | Vector extension status and VLEN | `Enabled, VLEN>=256` or `Not detected` |
+| Z-{Category}: | Z-extensions grouped by category | `Z-Bit: Zba Zbb Zbc Zbs` |
+| S-{Category}: | S-extensions (privileged) by category | `S-Sup: Sstc` |
+| Vector | Vector extension status and VLEN | `Enabled, VLEN>=256` or empty |
 | Harts | Number of hardware threads | `4 harts` |
 | HW IDs | Hardware identifiers | `vendor:0x489 arch:0x... impl:0x...` |
 | Cache | Cache sizes | `L1D:32K L1I:32K L2:2048K` |
-| Board | Device tree model name | `StarFive VisionFive 2` |
+| Board | Device tree model name | `SpacemiT K1` |
 | OS | Operating system name and version | `Ubuntu 24.04 LTS` |
 | Kernel | Kernel version | `6.8.0-riscv64` |
 | Memory | Used / Total memory | `3.45 GiB / 8.00 GiB` |
 | Uptime | System uptime | `3h 42m` |
 | User | Username and hostname | `user@hostname` |
+
+### Extension Categories
+
+**Z-Extension Categories:**
+| Category | Display Name | Examples |
+|----------|-------------|----------|
+| base | Base | Zicsr, Zifencei, Zicntr, Zihpm |
+| hint | Hints | Zihintpause, Zihintntl |
+| cache | Cache | Zicbom, Zicboz, Zicbop |
+| bit | Bit Manipulation | Zba, Zbb, Zbc, Zbs |
+| crypto | Cryptography | Zk, Zkn, Zknd, Zkne, ... |
+| fp | Floating Point | Zfh, Zfhmin, Zfa, Zfinx, ... |
+| comp | Compressed | Zca, Zcb, Zcd, Zcf, ... |
+| atomic | Atomics | Zacas, Zabha, Zaamo, ... |
+| mem | Memory Model | Za64rs, Za128rs, Ztso, ... |
+| vec | Vector | Zve32x, Zvl128b, Zvl256b, ... |
+| vcrypto | Vector Crypto | Zvbb, Zvbc, Zvkg, ... |
+
+**S-Extension Categories:**
+| Category | Display Name | Examples |
+|----------|-------------|----------|
+| vm | Virtual Memory | Svinval, Svnapot, Svpbmt, ... |
+| sup | Supervisor | Ssaia, Sstc, Ssstateen, ... |
+| mach | Machine | Smaia, Smepmp, Smstateen, ... |
+| hyp | Hypervisor | Sha, Shgatpa, ... |
+| debug | Debug | Sdext, Sdtrig |
+| user | User | Supm |
 
 ### Separator
 
@@ -108,22 +142,40 @@ A line of dashes (`--------------------------------`) separates RISC-V specific 
 
 ## Output Format (--explain Mode)
 
-Shows each extension with its description:
+Shows each extension with its description, grouped by category with aligned columns:
 
 ```
-ISA Extensions:
-  I   Base Integer Instructions
-  M   Integer Multiply/Divide
-  A   Atomic Instructions
-  F   Single-Precision Float
-  D   Double-Precision Float
-  C   Compressed (16-bit)
+Extensions:
+  I          Base Integer Instructions
+  M          Integer Multiply/Divide
+  A          Atomic Instructions
+  F          Single-Precision Float
+  D          Double-Precision Float
+  C          Compressed (16-bit)
+  V          Vector (SIMD)
 
-Z-Extensions:
-  Zicsr     CSR Instructions
-  Zifencei  Instruction-Fetch Fence
-  Zba       Address Generation
-  Zbb       Basic Bit Manipulation
+Z-Extensions (Base):
+  Zicsr      CSR Instructions
+  Zifencei   Instruction-Fetch Fence
+  Zicntr     Base Counters/Timers
+  Zihpm      Hardware Perf Counters
+
+Z-Extensions (Bit Manipulation):
+  Zba        Address Generation
+  Zbb        Basic Bit Manipulation
+  Zbc        Carry-less Multiply
+  Zbs        Single-bit Operations
+
+Z-Extensions (Cryptography):
+  Zkt        Data-Indep Timing
+
+Z-Extensions (Vector):
+  Zvl128b    VLEN >= 128 bits
+  Zvl256b    VLEN >= 256 bits
+  Zvkt       Vector Data-Indep Time
+
+S-Extensions (Supervisor):
+  Sstc       Supervisor Timer
 ```
 
 ---
@@ -134,30 +186,31 @@ Z-Extensions:
 
 ```json
 {
-  "isa": "rv64imafdc_zicsr_zifencei",
-  "extensions": ["I", "M", "A", "F", "D", "C"],
-  "z_extensions": ["zicsr", "zifencei"],
+  "isa": "rv64imafdcv_zicsr_zifencei_zba_zbb_sstc",
+  "extensions": ["I", "M", "A", "F", "D", "C", "V"],
+  "z_extensions": ["Zicsr", "Zifencei", "Zba", "Zbb"],
+  "s_extensions": ["Sstc"],
   "vector": {
-    "enabled": false,
+    "enabled": true,
     "vlen": null,
     "elen": null
   },
-  "hart_count": 4,
+  "hart_count": 8,
   "hardware_ids": {
-    "mvendorid": "0x489",
+    "mvendorid": "0x710",
     "marchid": "0x8000000000000007",
     "mimpid": "0x0"
   },
   "cache": {
     "l1d": "32K",
     "l1i": "32K",
-    "l2": "2048K",
+    "l2": "512K",
     "l3": null
   },
-  "board": "StarFive VisionFive 2",
+  "board": "SpacemiT K1",
   "memory_used_bytes": 3707764736,
   "memory_total_bytes": 8589934592,
-  "kernel": "6.8.0-riscv64",
+  "kernel": "6.1.15-riscv64",
   "os": "Ubuntu 24.04 LTS",
   "uptime_seconds": 13320
 }
@@ -302,5 +355,7 @@ Example: `riscfetch 0.2.0`
 
 ## Version
 
-- Spec version: 1.1
+- Spec version: 2.0
 - Last updated: 2025-12
+- Based on RISC-V ISA spec version: 2025-11-26
+- Supports 98 Z-extensions and 46 S-extensions (144 total)

@@ -5,7 +5,7 @@ mod logos;
 
 use clap::Parser;
 use cli::Args;
-use colored::*;
+use colored::Colorize;
 use riscfetch_core as info;
 
 fn main() {
@@ -61,7 +61,8 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool
     // === RISC-V Specific Information ===
     let isa_string = info::get_isa_string();
     let extensions_compact = info::get_extensions_compact();
-    let z_extensions = info::get_z_extensions();
+    let z_exts_with_cat = info::get_z_extensions_with_category();
+    let s_exts_with_cat = info::get_s_extensions_with_category();
     let vector_info = info::get_vector_detail();
     let hart_count = info::get_hart_count();
     let hw_ids = info::get_hardware_ids();
@@ -72,29 +73,11 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool
 
     // Extensions
     if explain {
-        println!("{}", "Extensions:".bright_yellow().bold());
-        for (ext, desc) in info::get_extensions_explained() {
-            println!("  {} - {}", ext.bright_green(), desc);
-        }
-        if !z_extensions.is_empty() {
-            println!("{}", "Z-Extensions:".bright_yellow().bold());
-            for (ext, desc) in info::get_z_extensions_explained() {
-                println!("  {} - {}", ext.bright_green(), desc);
-            }
-        }
+        // Detailed mode with category groups and aligned columns
+        display_extensions_explained(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
     } else {
-        println!(
-            "{} {}",
-            "Ext:".bright_yellow().bold(),
-            extensions_compact.white()
-        );
-        if !z_extensions.is_empty() {
-            println!(
-                "{} {}",
-                "Z-Ext:".bright_yellow().bold(),
-                z_extensions.white()
-            );
-        }
+        // Compact mode with category groups
+        display_extensions_compact(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
     }
 
     // Vector extension
@@ -179,4 +162,83 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool
     );
 
     println!();
+}
+
+/// Display extensions in compact mode (category-grouped multiple lines)
+fn display_extensions_compact(
+    std_exts: &str,
+    z_exts: &[info::ExtensionInfo],
+    s_exts: &[info::ExtensionInfo],
+) {
+    // Standard extensions
+    if !std_exts.is_empty() {
+        println!("{} {}", "Ext:".bright_yellow().bold(), std_exts.white());
+    }
+
+    // Z-extensions grouped by category
+    let z_groups = info::group_by_category(z_exts);
+    for (category, exts) in &z_groups {
+        let cat_name = info::get_z_category_name(category);
+        let ext_names: Vec<&str> = exts.iter().map(|e| e.name.as_str()).collect();
+        println!(
+            "{} {}",
+            format!("Z-{cat_name}:").bright_yellow().bold(),
+            ext_names.join(" ").white()
+        );
+    }
+
+    // S-extensions grouped by category
+    let s_groups = info::group_by_category(s_exts);
+    for (category, exts) in &s_groups {
+        let cat_name = info::get_s_category_name(category);
+        let ext_names: Vec<&str> = exts.iter().map(|e| e.name.as_str()).collect();
+        println!(
+            "{} {}",
+            format!("S-{cat_name}:").bright_magenta().bold(),
+            ext_names.join(" ").white()
+        );
+    }
+}
+
+/// Display extensions in explained mode (category-grouped with aligned columns)
+fn display_extensions_explained(
+    _std_exts: &str,
+    z_exts: &[info::ExtensionInfo],
+    s_exts: &[info::ExtensionInfo],
+) {
+    // Standard extensions
+    println!("{}", "Extensions:".bright_yellow().bold());
+    for (ext, desc) in info::get_extensions_explained() {
+        println!("  {:<10} {}", ext.bright_green(), desc);
+    }
+
+    // Z-extensions grouped by category
+    let z_groups = info::group_by_category(z_exts);
+    for (category, exts) in &z_groups {
+        let cat_name = info::get_z_category_name(category);
+        println!();
+        println!(
+            "{}",
+            format!("Z-Extensions ({cat_name}):").bright_yellow().bold()
+        );
+        for ext in exts {
+            println!("  {:<10} {}", ext.name.bright_green(), ext.description);
+        }
+    }
+
+    // S-extensions grouped by category
+    let s_groups = info::group_by_category(s_exts);
+    for (category, exts) in &s_groups {
+        let cat_name = info::get_s_category_name(category);
+        println!();
+        println!(
+            "{}",
+            format!("S-Extensions ({cat_name}):")
+                .bright_magenta()
+                .bold()
+        );
+        for ext in exts {
+            println!("  {:<10} {}", ext.name.bright_green(), ext.description);
+        }
+    }
 }

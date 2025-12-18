@@ -165,25 +165,114 @@ Returns detected extensions with human-readable descriptions.
 
 Returns Z-extensions with descriptions.
 
-#### Known Z-Extensions
+#### Z-Extension Categories
 
-| Extension | Display Name | Description |
-|-----------|--------------|-------------|
-| zicsr | Zicsr | CSR Instructions |
-| zifencei | Zifencei | Instruction-Fetch Fence |
-| zicntr | Zicntr | Base Counters/Timers |
-| zihpm | Zihpm | Hardware Perf Counters |
-| zba | Zba | Address Generation |
-| zbb | Zbb | Basic Bit Manipulation |
-| zbc | Zbc | Carry-less Multiply |
-| zbs | Zbs | Single-bit Operations |
-| zicbom | Zicbom | Cache-Block Management |
-| zicboz | Zicboz | Cache-Block Zero |
-| zihintpause | Zihintpause | Pause Hint |
-| zkt | Zkt | Data-Independent Timing |
-| zvkt | Zvkt | Vector Data-Independent Timing |
+Z-extensions are grouped by functional category:
 
-Unknown Z-extensions should return `(name, "Unknown")`.
+| Category | Description | Examples |
+|----------|-------------|----------|
+| Base | Core CSR/Fence operations | Zicsr, Zifencei, Zicntr, Zihpm |
+| Hints | Hint instructions | Zihintpause, Zihintntl |
+| Cache | Cache management | Zicbom, Zicboz, Zicbop |
+| Conditional | Conditional operations | Zicond |
+| Bit Manipulation | Bit operations | Zba, Zbb, Zbc, Zbs |
+| Cryptography | Scalar crypto | Zk, Zkn, Zknd, Zkne, Zknh, Zks, Zksed, Zksh, Zkr, Zkt |
+| Floating Point | FP extensions | Zfh, Zfhmin, Zfa, Zfinx, Zdinx, Zhinx |
+| Compressed | Compressed instructions | Zca, Zcb, Zcd, Zcf, Zcmp, Zcmt |
+| Atomics | Atomic operations | Zacas, Zabha, Zaamo, Zalrsc, Zawrs |
+| Memory Model | Memory ordering | Za64rs, Za128rs, Zama16b, Ztso, Zic64b |
+| Multiply | Multiply only | Zmmul |
+| Vector | Vector operations | Zve32x, Zve64x, Zvl128b, Zvfh |
+| Vector Crypto | Vector cryptography | Zvbb, Zvbc, Zvkg, Zvkn, Zvks |
+| Other | Miscellaneous | Zimop, Zilsd |
+
+---
+
+### `parse_s_extensions(isa: &str) -> String`
+
+Extracts S-extensions (privileged) from ISA string.
+
+#### S-Extension Categories
+
+| Category | Description | Examples |
+|----------|-------------|----------|
+| Virtual Memory | Address translation | Svinval, Svnapot, Svpbmt, Svade, Svadu |
+| Supervisor | S-mode features | Ssaia, Sstc, Ssstateen, Sstvala |
+| Machine | M-mode features | Smaia, Smstateen, Smepmp, Smrnmi |
+| Hypervisor | H-mode features | Sha, Shgatpa, Shtvala, Shvstvala |
+| Debug | Debug features | Sdext, Sdtrig |
+| User | U-mode features | Supm |
+
+---
+
+### Full Extension List
+
+#### Z-Extensions (98 total)
+
+**Base (4)**
+- Zicsr, Zifencei, Zicntr, Zihpm
+
+**Hints (2)**
+- Zihintpause, Zihintntl
+
+**Cache (3)**
+- Zicbom, Zicboz, Zicbop
+
+**Conditional (1)**
+- Zicond
+
+**Bit Manipulation (4)**
+- Zba, Zbb, Zbc, Zbs
+
+**Cryptography (13)**
+- Zbkb, Zbkc, Zbkx, Zk, Zkn, Zknd, Zkne, Zknh, Zks, Zksed, Zksh, Zkr, Zkt
+
+**Floating Point (8)**
+- Zfh, Zfhmin, Zfa, Zfinx, Zdinx, Zhinx, Zhinxmin, Zfbfmin
+
+**Compressed (8)**
+- Zca, Zcb, Zcd, Zcf, Zcmp, Zcmt, Zcmop, Zclsd
+
+**Atomics (5)**
+- Zacas, Zabha, Zaamo, Zalrsc, Zawrs
+
+**Memory Model (10)**
+- Za64rs, Za128rs, Zama16b, Zic64b, Ziccamoa, Ziccamoc, Ziccif, Zicclsm, Ziccrse, Ztso
+
+**Multiply (1)**
+- Zmmul
+
+**Other (2)**
+- Zimop, Zilsd
+
+**Vector (21)**
+- Zve32f, Zve32x, Zve64d, Zve64f, Zve64x, Zvfh, Zvfhmin, Zvfbfmin, Zvfbfwma
+- Zvl32b, Zvl64b, Zvl128b, Zvl256b, Zvl512b, Zvl1024b, Zvl2048b, Zvl4096b, Zvl8192b, Zvl16384b, Zvl32768b, Zvl65536b
+
+**Vector Crypto (16)**
+- Zvbb, Zvbc, Zvkb, Zvkg, Zvkn, Zvknc, Zvkned, Zvkng, Zvknha, Zvknhb, Zvks, Zvksc, Zvksed, Zvksg, Zvksh, Zvkt
+
+#### S-Extensions (46 total)
+
+**Virtual Memory (7)**
+- Svinval, Svnapot, Svpbmt, Svade, Svadu, Svbare, Svvptc
+
+**Supervisor (17)**
+- Ssaia, Ssccfg, Ssccptr, Sscofpmf, Sscounterenw, Sscsrind, Ssctr, Ssdbltrp, Ssnpm, Sspm, Ssqosid, Ssstateen, Ssstrict, Sstc, Sstvala, Sstvecd, Ssu64xl
+
+**Machine (11)**
+- Smaia, Smcdeleg, Smcntrpmf, Smcsrind, Smctr, Smdbltrp, Smepmp, Smmpm, Smnpm, Smrnmi, Smstateen
+
+**Hypervisor (8)**
+- Sha, Shcounterenw, Shgatpa, Shlcofideleg, Shtvala, Shvsatpa, Shvstvala, Shvstvecd
+
+**Debug (2)**
+- Sdext, Sdtrig
+
+**User (1)**
+- Supm
+
+Unknown extensions are still parsed but may not have descriptions.
 
 ---
 
@@ -227,6 +316,7 @@ parse_extensions_compact("rv64gc") → "I M A F D C"  (not "G C")
 
 ## Version
 
-- Spec version: 1.0
+- Spec version: 2.0
 - Last updated: 2025-12
-- Based on RISC-V ISA spec version: 20240411
+- Based on RISC-V ISA spec version: 2025-11-26 (Unprivileged/Privileged)
+- Reference: LLVM 22.0 RISC-V extension support

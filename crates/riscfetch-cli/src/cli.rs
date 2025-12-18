@@ -3,6 +3,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(name = "riscfetch")]
 #[command(author, version, about = "RISC-V architecture information display tool", long_about = None)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct Args {
     /// Vendor logo (default, sifive, starfive, kendryte, allwinner, espressif, spacemit, thead, milkv, sipeed, sophgo)
     #[arg(short, long, default_value = "default")]

@@ -1,4 +1,4 @@
-use colored::*;
+use colored::Colorize;
 use std::time::Instant;
 
 pub fn run_benchmarks() {
@@ -37,6 +37,7 @@ pub fn run_benchmarks() {
     println!();
 }
 
+#[allow(clippy::cast_precision_loss)]
 fn benchmark_integer_ops() -> f64 {
     const ITERATIONS: u64 = 10_000_000;
     let start = Instant::now();
@@ -55,6 +56,7 @@ fn benchmark_integer_ops() -> f64 {
     ops_per_sec
 }
 
+#[allow(clippy::cast_precision_loss)]
 fn benchmark_float_ops() -> f64 {
     const ITERATIONS: u64 = 5_000_000;
     let start = Instant::now();
@@ -74,6 +76,7 @@ fn benchmark_float_ops() -> f64 {
     ops_per_sec
 }
 
+#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation)]
 fn benchmark_memory() -> f64 {
     const SIZE: usize = 10_000_000;
     let mut data = vec![0u8; SIZE];
@@ -88,7 +91,7 @@ fn benchmark_memory() -> f64 {
     // Read benchmark
     let mut sum: u64 = 0;
     for &byte in &data {
-        sum = sum.wrapping_add(byte as u64);
+        sum = sum.wrapping_add(u64::from(byte));
     }
 
     let elapsed = start.elapsed();

@@ -2,10 +2,12 @@
 
 use crate::parsing::parse_vector_from_isa;
 use crate::types::HardwareIds;
+use std::fmt::Write;
 use std::fs;
 use sysinfo::System;
 
-/// Get raw ISA string (e.g., "rv64imafdcv_zicsr_...")
+/// Get raw ISA string (e.g., `rv64imafdcv_zicsr_...`)
+#[must_use]
 pub fn get_isa_string() -> String {
     if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
         for line in content.lines() {
@@ -20,6 +22,7 @@ pub fn get_isa_string() -> String {
 }
 
 /// Get hardware IDs (mvendorid, marchid, mimpid)
+#[must_use]
 pub fn get_hardware_ids() -> HardwareIds {
     let mut ids = HardwareIds::default();
 
@@ -54,6 +57,7 @@ pub fn get_hardware_ids() -> HardwareIds {
 }
 
 /// Get hart count as formatted string
+#[must_use]
 pub fn get_hart_count() -> String {
     if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
         let count = content
@@ -72,6 +76,7 @@ pub fn get_hart_count() -> String {
 }
 
 /// Get hart count as number
+#[must_use]
 pub fn get_hart_count_num() -> usize {
     if let Ok(content) = fs::read_to_string("/proc/cpuinfo") {
         let count = content
@@ -89,6 +94,7 @@ pub fn get_hart_count_num() -> usize {
 }
 
 /// Get cache information
+#[must_use]
 pub fn get_cache_info() -> String {
     let mut cache_parts = Vec::new();
 
@@ -124,6 +130,7 @@ pub fn get_cache_info() -> String {
 }
 
 /// Get board/model information from device tree
+#[must_use]
 pub fn get_board_info() -> String {
     if let Ok(content) = fs::read_to_string("/proc/device-tree/model") {
         let model = content.trim_matches('\0').trim();
@@ -134,7 +141,7 @@ pub fn get_board_info() -> String {
 
     if let Ok(content) = fs::read_to_string("/proc/device-tree/compatible") {
         let parts: Vec<&str> = content.split('\0').collect();
-        if let Some(first) = parts.first() {
+        if let Some(&first) = parts.first() {
             if !first.is_empty() {
                 return first.to_string();
             }
@@ -145,6 +152,7 @@ pub fn get_board_info() -> String {
 }
 
 /// Get vector extension details (VLEN, ELEN)
+#[must_use]
 pub fn get_vector_detail() -> String {
     let isa = get_isa_string();
     let mut result = parse_vector_from_isa(&isa).unwrap_or_default();
@@ -152,7 +160,7 @@ pub fn get_vector_detail() -> String {
     // Try to get actual VLEN from sysfs
     if !result.is_empty() {
         if let Ok(vlen) = fs::read_to_string("/sys/devices/system/cpu/cpu0/riscv/vlen") {
-            result.push_str(&format!(", VLEN={}", vlen.trim()));
+            let _ = write!(result, ", VLEN={}", vlen.trim());
         }
     }
 

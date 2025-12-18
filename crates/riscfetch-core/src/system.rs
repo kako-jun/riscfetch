@@ -5,6 +5,8 @@ use std::process::Command;
 use sysinfo::System;
 
 /// Get memory usage as formatted string
+#[must_use]
+#[allow(clippy::cast_precision_loss)]
 pub fn get_memory_info() -> String {
     let mut sys = System::new();
     sys.refresh_memory();
@@ -19,6 +21,7 @@ pub fn get_memory_info() -> String {
 }
 
 /// Get memory information as bytes
+#[must_use]
 pub fn get_memory_bytes() -> (u64, u64) {
     let mut sys = System::new();
     sys.refresh_memory();
@@ -26,6 +29,7 @@ pub fn get_memory_bytes() -> (u64, u64) {
 }
 
 /// Get kernel version
+#[must_use]
 pub fn get_kernel_info() -> String {
     if let Ok(output) = Command::new("uname").arg("-r").output() {
         let kernel = String::from_utf8_lossy(&output.stdout).trim().to_string();
@@ -37,6 +41,7 @@ pub fn get_kernel_info() -> String {
 }
 
 /// Get OS name from /etc/os-release
+#[must_use]
 pub fn get_os_info() -> String {
     if let Ok(content) = fs::read_to_string("/etc/os-release") {
         for line in content.lines() {
@@ -52,6 +57,7 @@ pub fn get_os_info() -> String {
 }
 
 /// Get uptime as formatted string
+#[must_use]
 pub fn get_uptime() -> String {
     let uptime_secs = System::uptime();
     let hours = uptime_secs / 3600;
@@ -65,6 +71,7 @@ pub fn get_uptime() -> String {
 }
 
 /// Get uptime in seconds
+#[must_use]
 pub fn get_uptime_seconds() -> u64 {
     System::uptime()
 }

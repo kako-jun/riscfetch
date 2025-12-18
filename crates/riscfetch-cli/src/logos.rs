@@ -1,8 +1,9 @@
 //! Logo generation using figlet-rs
 //!
-//! Dynamically generates ASCII art logos for vendors using FIGlet fonts.
+//! Dynamically generates ASCII art logos for vendors using `FIGlet` fonts.
 
 use figlet_rs::FIGfont;
+use std::fmt::Write;
 
 /// Available vendor logos
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -46,7 +47,7 @@ impl LogoVendor {
     }
 
     /// Get the display name for this vendor
-    fn display_name(&self) -> &'static str {
+    fn display_name(self) -> &'static str {
         match self {
             Self::Default => "RISC-V",
             Self::SiFive => "SiFive",
@@ -63,7 +64,7 @@ impl LogoVendor {
     }
 
     /// Get the subtitle for this vendor
-    fn subtitle(&self) -> &'static str {
+    fn subtitle(self) -> &'static str {
         match self {
             Self::Default => "Architecture Info",
             Self::SiFive => "RISC-V by SiFive",
@@ -99,7 +100,7 @@ pub fn generate_logo(vendor: LogoVendor, style: LogoStyle) -> String {
     }
 }
 
-/// Generate FIGlet ASCII art logo
+/// Generate `FIGlet` ASCII art logo
 fn generate_figlet_logo(vendor: LogoVendor) -> String {
     let standard_font = FIGfont::standard();
 
@@ -113,7 +114,7 @@ fn generate_figlet_logo(vendor: LogoVendor) -> String {
                     let logo_width = fig_str
                         .lines()
                         .filter(|l| !l.trim().is_empty())
-                        .map(|l| l.len())
+                        .map(str::len)
                         .max()
                         .unwrap_or(0);
 
@@ -127,11 +128,11 @@ fn generate_figlet_logo(vendor: LogoVendor) -> String {
                     let mut result = String::new();
                     result.push('\n');
                     result.push_str(&fig_str);
-                    result.push_str(&format!(
-                        "{:>width$}\n",
-                        subtitle,
+                    let _ = writeln!(
+                        result,
+                        "{subtitle:>width$}",
                         width = padding + subtitle.len()
-                    ));
+                    );
                     result
                 }
                 None => fallback_logo(vendor),
@@ -141,7 +142,7 @@ fn generate_figlet_logo(vendor: LogoVendor) -> String {
     }
 }
 
-/// Fallback if FIGlet fails
+/// Fallback if `FIGlet` fails
 fn fallback_logo(vendor: LogoVendor) -> String {
     format!(
         "\n  === {} ===\n       {}\n",
@@ -227,11 +228,7 @@ mod tests {
 
         for vendor in vendors {
             let logo = generate_logo(vendor, LogoStyle::Normal);
-            assert!(
-                !logo.is_empty(),
-                "Logo for {:?} should not be empty",
-                vendor
-            );
+            assert!(!logo.is_empty(), "Logo for {vendor:?} should not be empty");
         }
     }
 }

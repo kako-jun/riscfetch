@@ -45,6 +45,7 @@ pub struct SystemInfo {
     pub isa: String,
     pub extensions: Vec<String>,
     pub z_extensions: Vec<String>,
+    pub s_extensions: Vec<String>,
     pub vector: VectorInfo,
     pub hart_count: usize,
     pub hardware_ids: HardwareIds,
