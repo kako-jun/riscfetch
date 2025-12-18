@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0] - 2025-12-18
+
+### Added
+- Complete RISC-V extension support (144 extensions: 98 Z + 46 S)
+- `--all` (`-a`) flag to show all extensions with checkmarks (✓/✗)
+- `--all` works with `--json` for machine-readable output with `supported` field
+- Pine64 and WCH vendors (now 13 vendors total)
+- Extensions grouped by category (Base, Bit, Cache, Crypto, Vector, etc.)
+
+### Changed
+- Data-driven vendor definitions (vendors.rs)
+- Data-driven extension definitions (extensions.rs)
+- Updated to RISC-V ISA spec 2025-11-26
+
 ## [1.1.0] - 2025-12-17
 
 ### Added
