@@ -19,7 +19,6 @@ riscfetch [OPTIONS]
 | `-e` | `--explain` | Show detailed explanation of each ISA extension |
 | `-j` | `--json` | Output in JSON format |
 | `-a` | `--all` | Show all extensions with checkmarks for supported ones |
-| `-s` | `--splash` | Show animated splash screen |
 | `-b` | `--benchmark` | Run ISA-specific benchmarks |
 | `-l` | `--logo <VENDOR>` | Vendor logo (see Supported Vendors below) |
 | | `--style <STYLE>` | Logo style: normal, small, none |
@@ -225,9 +224,24 @@ The `--all` flag can be combined with other options (`-e`, `-l`, `-j`, `-r`, etc
 ```json
 {
   "isa": "rv64imafdcv_zicsr_zifencei_zba_zbb_sstc",
-  "extensions": ["I", "M", "A", "F", "D", "C", "V"],
-  "z_extensions": ["Zicsr", "Zifencei", "Zba", "Zbb"],
-  "s_extensions": ["Sstc"],
+  "extensions": [
+    {"name": "I", "description": "Base Integer Instructions"},
+    {"name": "M", "description": "Integer Multiply/Divide"},
+    {"name": "A", "description": "Atomic Instructions"},
+    {"name": "F", "description": "Single-Precision Float"},
+    {"name": "D", "description": "Double-Precision Float"},
+    {"name": "C", "description": "Compressed (16-bit)"},
+    {"name": "V", "description": "Vector (SIMD)"}
+  ],
+  "z_extensions": [
+    {"name": "Zicsr", "description": "CSR Instructions"},
+    {"name": "Zifencei", "description": "Instruction-Fetch Fence"},
+    {"name": "Zba", "description": "Address Generation"},
+    {"name": "Zbb", "description": "Basic Bit Manipulation"}
+  ],
+  "s_extensions": [
+    {"name": "Sstc", "description": "Supervisor Timer"}
+  ],
   "vector": {
     "enabled": true,
     "vlen": null,
@@ -327,14 +341,6 @@ Total score: 1234
 
 ---
 
-## Output Format (--splash Mode)
-
-- Display animated ASCII art logo
-- Duration: approximately 2 seconds
-- Then display normal output
-
----
-
 ## Vendor Logos (--logo)
 
 | Vendor | Description |
@@ -379,7 +385,6 @@ Options:
   -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, kendryte, allwinner, espressif, spacemit, sophgo, wch)
       --style <STYLE>   Logo style (normal, small, none)
   -b, --benchmark       Run simple benchmarks
-  -s, --splash          Show animated splash screen on startup
   -e, --explain         Show detailed explanation of each ISA extension
   -j, --json            Output in JSON format (machine-readable)
   -a, --all             Show all extensions with checkmarks for supported ones
@@ -437,7 +442,7 @@ Example: `riscfetch 0.2.0`
 
 ## Version
 
-- Spec version: 2.0
+- Spec version: 2.1
 - Last updated: 2025-12
 - Based on RISC-V ISA spec version: 2025-11-26
 - Supports 98 Z-extensions and 46 S-extensions (144 total)

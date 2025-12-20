@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.0] - 2025-12-20
+
+### Changed
+- Default RISC-V logo now uses block letter art with rainbow gradient
+- JSON output always includes `description` field for extensions (breaking change)
+  - `extensions` and `z_extensions` now contain `{name, description}` objects instead of strings
+
+### Removed
+- `--splash` (`-s`) option and animation code
+
 ## [2.0.0] - 2025-12-18
 
 ### Added
