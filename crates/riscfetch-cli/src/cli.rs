@@ -17,10 +17,6 @@ pub struct Args {
     #[arg(short, long)]
     pub benchmark: bool,
 
-    /// Show animated splash screen on startup
-    #[arg(short, long)]
-    pub splash: bool,
-
     /// Show detailed explanation of each ISA extension
     #[arg(short, long)]
     pub explain: bool,

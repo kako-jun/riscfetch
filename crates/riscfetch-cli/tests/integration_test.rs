@@ -12,7 +12,6 @@ fn test_help_command() {
     assert!(stdout.contains("RISC-V architecture information display tool"));
     assert!(stdout.contains("--logo"));
     assert!(stdout.contains("--benchmark"));
-    assert!(stdout.contains("--splash"));
     assert!(stdout.contains("--explain"));
     assert!(stdout.contains("--json"));
 }
@@ -84,7 +83,6 @@ fn test_short_flags() {
     // Check short flags exist
     assert!(stdout.contains("-e"));
     assert!(stdout.contains("-j"));
-    assert!(stdout.contains("-s"));
     assert!(stdout.contains("-b"));
     assert!(stdout.contains("-l"));
     assert!(stdout.contains("-r"));

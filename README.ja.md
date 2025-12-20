@@ -56,7 +56,6 @@ riscfetch -r           # RISC-V 固有情報のみ（OS、メモリ等を除外�
 riscfetch -e           # 各 ISA 拡張の説明を表示
 riscfetch -j           # JSON 出力
 riscfetch -a -j        # 全拡張を JSON 出力
-riscfetch -s           # アニメーション付きスプラッシュ
 riscfetch -b           # ベンチマーク実行
 riscfetch -l pine64    # Pine64 ロゴを使用
 ```
@@ -95,7 +94,6 @@ User:       user@visionfive2
 | `-e, --explain` | 各拡張の意味を表示 |
 | `-a, --all` | 全144拡張を ✓/✗ チェックマーク付きで表示 |
 | `-j, --json` | 機械可読な JSON 出力 |
-| `-s, --splash` | アニメーション付きスプラッシュ |
 | `-b, --benchmark` | ISA 固有のベンチマーク |
 | `-l, --logo <VENDOR>` | ベンダーロゴ（下記参照） |
 | `--style <STYLE>` | ロゴスタイル: normal, small, none |

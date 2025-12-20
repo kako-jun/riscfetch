@@ -26,10 +26,6 @@ fn main() {
         return;
     }
 
-    if args.splash {
-        display::show_splash_animation();
-    }
-
     display_riscv_info(
         &args.logo,
         &args.style,

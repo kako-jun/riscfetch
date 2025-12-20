@@ -56,7 +56,6 @@ riscfetch -r           # RISC-V info only (no OS, memory, etc.)
 riscfetch -e           # explain each ISA extension
 riscfetch -j           # JSON output
 riscfetch -a -j        # JSON with all extensions
-riscfetch -s           # animated splash
 riscfetch -b           # run benchmarks
 riscfetch -l pine64    # use Pine64 logo
 ```
@@ -95,7 +94,6 @@ User:       user@visionfive2
 | `-e, --explain` | Show meaning of each extension |
 | `-a, --all` | Show all 144 extensions with ✓/✗ checkmarks |
 | `-j, --json` | Machine-readable JSON output |
-| `-s, --splash` | Animated startup |
 | `-b, --benchmark` | ISA-specific benchmarks |
 | `-l, --logo <VENDOR>` | Vendor logo (see below) |
 | `--style <STYLE>` | Logo style: normal, small, none |

@@ -6,6 +6,17 @@ use crate::vendors::{get_default_vendor, get_vendor_info};
 use figlet_rs::FIGfont;
 use std::fmt::Write;
 
+/// RISC-V block letter logo
+const RISCV_LOGO: &str = r"
+        ██████╗ ██╗███████╗ ██████╗      ██╗   ██╗
+        ██╔══██╗██║██╔════╝██╔════╝      ██║   ██║
+        ██████╔╝██║███████╗██║     █████╗██║   ██║
+        ██╔══██╗██║╚════██║██║     ╚════╝╚██╗ ██╔╝
+        ██║  ██║██║███████║╚██████╗       ╚████╔╝
+        ╚═╝  ╚═╝╚═╝╚══════╝ ╚═════╝        ╚═══╝
+                    Architecture Info
+";
+
 /// Logo display styles
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LogoStyle {
@@ -33,7 +44,13 @@ pub fn generate_logo(vendor: &str, style: LogoStyle) -> String {
     match style {
         LogoStyle::None => String::new(),
         LogoStyle::Small => format!("  {display_name} - {subtitle}"),
-        LogoStyle::Normal => generate_figlet_logo(display_name, subtitle),
+        LogoStyle::Normal => {
+            if display_name == "RISC-V" {
+                RISCV_LOGO.to_string()
+            } else {
+                generate_figlet_logo(display_name, subtitle)
+            }
+        }
     }
 }
 
@@ -119,7 +136,8 @@ mod tests {
     fn test_generate_logo_normal_not_empty() {
         let logo = generate_logo("default", LogoStyle::Normal);
         assert!(!logo.is_empty());
-        assert!(logo.contains("Architecture Info"));
+        // Should contain block letters from RISCV_LOGO
+        assert!(logo.contains("██████╗"));
     }
 
     #[test]

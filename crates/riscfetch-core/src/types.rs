@@ -2,6 +2,13 @@
 
 use serde::Serialize;
 
+/// Extension entry with name and description
+#[derive(Serialize, Clone, Debug, PartialEq, Eq)]
+pub struct ExtensionEntry {
+    pub name: String,
+    pub description: String,
+}
+
 /// Hardware IDs from RISC-V CSRs
 #[derive(Default, Serialize, Clone, Debug)]
 pub struct HardwareIds {
@@ -31,8 +38,8 @@ pub struct CacheInfo {
 #[derive(Serialize, Debug)]
 pub struct RiscvInfo {
     pub isa: String,
-    pub extensions: Vec<String>,
-    pub z_extensions: Vec<String>,
+    pub extensions: Vec<ExtensionEntry>,
+    pub z_extensions: Vec<ExtensionEntry>,
     pub vector: VectorInfo,
     pub hart_count: usize,
     pub hardware_ids: HardwareIds,
@@ -43,9 +50,9 @@ pub struct RiscvInfo {
 #[derive(Serialize, Debug)]
 pub struct SystemInfo {
     pub isa: String,
-    pub extensions: Vec<String>,
-    pub z_extensions: Vec<String>,
-    pub s_extensions: Vec<String>,
+    pub extensions: Vec<ExtensionEntry>,
+    pub z_extensions: Vec<ExtensionEntry>,
+    pub s_extensions: Vec<ExtensionEntry>,
     pub vector: VectorInfo,
     pub hart_count: usize,
     pub hardware_ids: HardwareIds,

@@ -56,7 +56,6 @@ riscfetch -r           # 仅显示 RISC-V 特定信息（排除 OS、内存等�
 riscfetch -e           # 解释每个 ISA 扩展
 riscfetch -j           # JSON 输出
 riscfetch -a -j        # 全部扩展 JSON 输出
-riscfetch -s           # 动画启动画面
 riscfetch -b           # 运行基准测试
 riscfetch -l pine64    # 使用 Pine64 logo
 ```
@@ -95,7 +94,6 @@ User:       user@visionfive2
 | `-e, --explain` | 显示每个扩展的含义 |
 | `-a, --all` | 显示全部 144 种扩展，带 ✓/✗ 标记 |
 | `-j, --json` | 机器可读的 JSON 输出 |
-| `-s, --splash` | 动画启动画面 |
 | `-b, --benchmark` | ISA 特定基准测试 |
 | `-l, --logo <VENDOR>` | 厂商 logo（见下文） |
 | `--style <STYLE>` | Logo 样式：normal、small、none |

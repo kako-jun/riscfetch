@@ -21,7 +21,7 @@ mod system;
 mod types;
 
 // Re-export types
-pub use types::{CacheInfo, HardwareIds, RiscvInfo, SystemInfo, VectorInfo};
+pub use types::{CacheInfo, ExtensionEntry, HardwareIds, RiscvInfo, SystemInfo, VectorInfo};
 
 // Re-export extension definitions
 pub use extensions::{
@@ -123,17 +123,19 @@ pub fn get_s_extensions_with_category() -> Vec<ExtensionInfo> {
 /// Collect RISC-V specific information only (excludes generic system info)
 #[must_use]
 pub fn collect_riscv_info() -> RiscvInfo {
+    use types::ExtensionEntry;
+
     let mut sys = System::new();
     sys.refresh_cpu_all();
 
     let isa = get_isa_string();
-    let exts: Vec<String> = get_extensions_explained()
+    let exts: Vec<ExtensionEntry> = get_extensions_explained()
         .into_iter()
-        .map(|(name, _)| name)
+        .map(|(name, description)| ExtensionEntry { name, description })
         .collect();
-    let z_exts: Vec<String> = get_z_extensions_explained()
+    let z_exts: Vec<ExtensionEntry> = get_z_extensions_explained()
         .into_iter()
-        .map(|(name, _)| name)
+        .map(|(name, description)| ExtensionEntry { name, description })
         .collect();
 
     let hw_ids = get_hardware_ids();
@@ -158,22 +160,24 @@ pub fn collect_riscv_info() -> RiscvInfo {
 /// Collect all information into a single struct
 #[must_use]
 pub fn collect_all_info() -> SystemInfo {
+    use types::ExtensionEntry;
+
     let mut sys = System::new();
     sys.refresh_memory();
     sys.refresh_cpu_all();
 
     let isa = get_isa_string();
-    let exts: Vec<String> = get_extensions_explained()
+    let exts: Vec<ExtensionEntry> = get_extensions_explained()
         .into_iter()
-        .map(|(name, _)| name)
+        .map(|(name, description)| ExtensionEntry { name, description })
         .collect();
-    let z_exts: Vec<String> = get_z_extensions_explained()
+    let z_exts: Vec<ExtensionEntry> = get_z_extensions_explained()
         .into_iter()
-        .map(|(name, _)| name)
+        .map(|(name, description)| ExtensionEntry { name, description })
         .collect();
-    let s_exts: Vec<String> = get_s_extensions_explained()
+    let s_exts: Vec<ExtensionEntry> = get_s_extensions_explained()
         .into_iter()
-        .map(|(name, _)| name)
+        .map(|(name, description)| ExtensionEntry { name, description })
         .collect();
 
     let hw_ids = get_hardware_ids();
