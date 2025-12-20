@@ -11,7 +11,7 @@ RISC-V システム情報ツール。ISA 拡張、hart 数、ハードウェア 
 
 **RISC-V 専用。** 他のアーキテクチャでは終了します。
 
-![riscfetch screenshot](assets/screenshot.webp)
+![riscfetch screenshot](https://raw.githubusercontent.com/kako-jun/riscfetch/main/assets/screenshot.webp)
 
 ## 特徴
 

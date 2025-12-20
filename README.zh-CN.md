@@ -11,7 +11,7 @@ RISC-V 系统信息工具。显示 ISA 扩展、hart 数量、硬件 ID 等信�
 
 **仅支持 RISC-V。** 在其他架构上会退出。
 
-![riscfetch screenshot](assets/screenshot.webp)
+![riscfetch screenshot](https://raw.githubusercontent.com/kako-jun/riscfetch/main/assets/screenshot.webp)
 
 ## 特性
 

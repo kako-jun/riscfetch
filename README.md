@@ -11,7 +11,7 @@ System information tool for RISC-V. Displays ISA extensions, hart count, hardwar
 
 **RISC-V only.** Exits on other architectures.
 
-![riscfetch screenshot](assets/screenshot.webp)
+![riscfetch screenshot](https://raw.githubusercontent.com/kako-jun/riscfetch/main/assets/screenshot.webp)
 
 ## Features
 
