@@ -29,8 +29,8 @@ fn main() {
     // Auto-detect vendor logo when not explicitly specified
     let logo = if args.logo == "default" {
         let board_info = info::get_board_info();
-        let compatible = std::fs::read_to_string("/proc/device-tree/compatible")
-            .unwrap_or_default();
+        let compatible =
+            std::fs::read_to_string("/proc/device-tree/compatible").unwrap_or_default();
         vendors::detect_vendor(&board_info, &compatible)
             .unwrap_or("default")
             .to_string()
@@ -38,13 +38,7 @@ fn main() {
         args.logo.clone()
     };
 
-    display_riscv_info(
-        &logo,
-        &args.style,
-        args.explain,
-        args.riscv_only,
-        args.all,
-    );
+    display_riscv_info(&logo, &args.style, args.explain, args.riscv_only, args.all);
 
     if args.benchmark {
         println!();

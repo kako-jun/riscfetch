@@ -162,26 +162,14 @@ mod tests {
 
     #[test]
     fn test_detect_vendor_from_model() {
-        assert_eq!(
-            detect_vendor("StarFive VisionFive 2", ""),
-            Some("starfive")
-        );
-        assert_eq!(
-            detect_vendor("Milk-V Mars", ""),
-            Some("milkv")
-        );
-        assert_eq!(
-            detect_vendor("", ""),
-            None
-        );
+        assert_eq!(detect_vendor("StarFive VisionFive 2", ""), Some("starfive"));
+        assert_eq!(detect_vendor("Milk-V Mars", ""), Some("milkv"));
+        assert_eq!(detect_vendor("", ""), None);
     }
 
     #[test]
     fn test_detect_vendor_from_compatible() {
-        assert_eq!(
-            detect_vendor("", "sipeed,licheerv-nano"),
-            Some("sipeed")
-        );
+        assert_eq!(detect_vendor("", "sipeed,licheerv-nano"), Some("sipeed"));
         assert_eq!(
             detect_vendor("", "starfive,visionfive-2-jh7110"),
             Some("starfive")
@@ -190,18 +178,12 @@ mod tests {
 
     #[test]
     fn test_detect_vendor_case_insensitive() {
-        assert_eq!(
-            detect_vendor("SIFIVE HIFIVE UNMATCHED", ""),
-            Some("sifive")
-        );
+        assert_eq!(detect_vendor("SIFIVE HIFIVE UNMATCHED", ""), Some("sifive"));
     }
 
     #[test]
     fn test_detect_vendor_unknown_board() {
-        assert_eq!(
-            detect_vendor("Some Unknown Board", "unknown,board"),
-            None
-        );
+        assert_eq!(detect_vendor("Some Unknown Board", "unknown,board"), None);
     }
 
     #[test]
