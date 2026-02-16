@@ -59,6 +59,53 @@ pub fn get_default_vendor() -> (&'static str, &'static str) {
     (display_name, subtitle)
 }
 
+/// Detection keywords for auto-detecting vendor from board/compatible strings.
+/// Broader than CLI aliases — includes board names and SoC identifiers.
+/// Format: (keyword, vendor_primary_alias)
+const VENDOR_KEYWORDS: &[(&str, &str)] = &[
+    ("sifive", "sifive"),
+    ("hifive", "sifive"),
+    ("starfive", "starfive"),
+    ("visionfive", "starfive"),
+    ("jh7110", "starfive"),
+    ("thead", "thead"),
+    ("t-head", "thead"),
+    ("xuantie", "thead"),
+    ("milkv", "milkv"),
+    ("milk-v", "milkv"),
+    ("sipeed", "sipeed"),
+    ("lichee", "sipeed"),
+    ("maix", "sipeed"),
+    ("pine64", "pine64"),
+    ("star64", "pine64"),
+    ("kendryte", "kendryte"),
+    ("canaan", "kendryte"),
+    ("allwinner", "allwinner"),
+    ("nezha", "allwinner"),
+    ("espressif", "espressif"),
+    ("esp32", "espressif"),
+    ("spacemit", "spacemit"),
+    ("sophgo", "sophgo"),
+    ("cv1800", "sophgo"),
+    ("sg2000", "sophgo"),
+    ("wch", "wch"),
+    ("ch32v", "wch"),
+    ("winchiphead", "wch"),
+];
+
+/// Auto-detect vendor from board model and device-tree compatible strings.
+/// Returns the vendor alias if a known keyword is found, or None.
+#[must_use]
+pub fn detect_vendor(board_info: &str, compatible: &str) -> Option<&'static str> {
+    let combined = format!("{board_info} {compatible}").to_lowercase();
+    for &(keyword, vendor) in VENDOR_KEYWORDS {
+        if combined.contains(keyword) {
+            return Some(vendor);
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -111,6 +158,50 @@ mod tests {
         // WCH
         let (name, _) = get_vendor_info("wch").unwrap();
         assert_eq!(name, "WCH");
+    }
+
+    #[test]
+    fn test_detect_vendor_from_model() {
+        assert_eq!(
+            detect_vendor("StarFive VisionFive 2", ""),
+            Some("starfive")
+        );
+        assert_eq!(
+            detect_vendor("Milk-V Mars", ""),
+            Some("milkv")
+        );
+        assert_eq!(
+            detect_vendor("", ""),
+            None
+        );
+    }
+
+    #[test]
+    fn test_detect_vendor_from_compatible() {
+        assert_eq!(
+            detect_vendor("", "sipeed,licheerv-nano"),
+            Some("sipeed")
+        );
+        assert_eq!(
+            detect_vendor("", "starfive,visionfive-2-jh7110"),
+            Some("starfive")
+        );
+    }
+
+    #[test]
+    fn test_detect_vendor_case_insensitive() {
+        assert_eq!(
+            detect_vendor("SIFIVE HIFIVE UNMATCHED", ""),
+            Some("sifive")
+        );
+    }
+
+    #[test]
+    fn test_detect_vendor_unknown_board() {
+        assert_eq!(
+            detect_vendor("Some Unknown Board", "unknown,board"),
+            None
+        );
     }
 
     #[test]
