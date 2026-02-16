@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2026-02-16
+
+### Added
+- Auto-detect vendor logo from board info (`/proc/device-tree/model` and `/proc/device-tree/compatible`)
+- 27 detection keywords covering all 13 vendors (board names, SoC names, vendor names)
+- `--logo` explicit flag still takes priority over auto-detection
+
 ## [2.1.0] - 2025-12-20
 
 ### Changed
