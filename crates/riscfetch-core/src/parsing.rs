@@ -267,8 +267,8 @@ pub fn get_all_z_extensions_with_status(isa: &str) -> Vec<ExtensionInfo> {
     Z_EXTENSIONS
         .iter()
         .map(|&(pattern, name, desc, category)| {
-            let supported =
-                isa_has_extension(&isa, pattern) || (has_g && (pattern == "zicsr" || pattern == "zifencei"));
+            let supported = isa_has_extension(&isa, pattern)
+                || (has_g && (pattern == "zicsr" || pattern == "zifencei"));
             ExtensionInfo {
                 name: name.to_string(),
                 description: desc.to_string(),
@@ -603,8 +603,14 @@ mod tests {
         // "zk" (Scalar Crypto All) must not be reported when only "zkn" is present
         let isa = "rv64i_zkn";
         let result = parse_z_extensions_explained(isa);
-        assert!(result.iter().any(|(n, _)| n == "Zkn"), "Zkn should be found");
-        assert!(!result.iter().any(|(n, _)| n == "Zk"), "Zk should NOT be found (false positive)");
+        assert!(
+            result.iter().any(|(n, _)| n == "Zkn"),
+            "Zkn should be found"
+        );
+        assert!(
+            !result.iter().any(|(n, _)| n == "Zk"),
+            "Zk should NOT be found (false positive)"
+        );
     }
 
     #[test]
@@ -612,9 +618,18 @@ mod tests {
         // "zks" must not be reported when only "zksed" is present
         let isa = "rv64i_zksed";
         let result = parse_z_extensions_explained(isa);
-        assert!(result.iter().any(|(n, _)| n == "Zksed"), "Zksed should be found");
-        assert!(!result.iter().any(|(n, _)| n == "Zks"), "Zks should NOT be found (false positive)");
-        assert!(!result.iter().any(|(n, _)| n == "Zk"), "Zk should NOT be found (false positive)");
+        assert!(
+            result.iter().any(|(n, _)| n == "Zksed"),
+            "Zksed should be found"
+        );
+        assert!(
+            !result.iter().any(|(n, _)| n == "Zks"),
+            "Zks should NOT be found (false positive)"
+        );
+        assert!(
+            !result.iter().any(|(n, _)| n == "Zk"),
+            "Zk should NOT be found (false positive)"
+        );
     }
 
     #[test]
@@ -622,7 +637,11 @@ mod tests {
         // S-extensions should not appear when only Z-extensions with 's' in name are present
         let isa = "rv64i_zbs_zks";
         let result = parse_s_extensions_explained(isa);
-        assert!(result.is_empty(), "No S-extensions should be found in Z-only ISA: {:?}", result);
+        assert!(
+            result.is_empty(),
+            "No S-extensions should be found in Z-only ISA: {:?}",
+            result
+        );
     }
 
     #[test]
@@ -630,8 +649,14 @@ mod tests {
         // "sstc" should match exactly, not as substring
         let isa = "rv64i_sstc_svnapot";
         let result = parse_s_extensions_explained(isa);
-        assert!(result.iter().any(|(n, _)| n == "Sstc"), "Sstc should be found");
-        assert!(result.iter().any(|(n, _)| n == "Svnapot"), "Svnapot should be found");
+        assert!(
+            result.iter().any(|(n, _)| n == "Sstc"),
+            "Sstc should be found"
+        );
+        assert!(
+            result.iter().any(|(n, _)| n == "Svnapot"),
+            "Svnapot should be found"
+        );
     }
 
     #[test]
@@ -639,8 +664,14 @@ mod tests {
         // "zvks" must not be reported when only "zvksc" is present
         let isa = "rv64iv_zvksc";
         let result = parse_z_extensions_explained(isa);
-        assert!(result.iter().any(|(n, _)| n == "Zvksc"), "Zvksc should be found");
-        assert!(!result.iter().any(|(n, _)| n == "Zvks"), "Zvks should NOT be found (false positive)");
+        assert!(
+            result.iter().any(|(n, _)| n == "Zvksc"),
+            "Zvksc should be found"
+        );
+        assert!(
+            !result.iter().any(|(n, _)| n == "Zvks"),
+            "Zvks should NOT be found (false positive)"
+        );
     }
 
     #[test]
