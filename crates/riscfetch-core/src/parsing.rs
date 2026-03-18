@@ -21,6 +21,13 @@ pub fn strip_rv_prefix(base: &str) -> &str {
         .unwrap_or(base)
 }
 
+/// Check if an ISA string contains a multi-letter extension by exact part matching.
+/// Extensions are underscore-separated; this avoids false positives from substring
+/// matching (e.g. "zk" matching inside "zkn", or "sha" inside "shvstvala").
+fn isa_has_extension(isa: &str, pattern: &str) -> bool {
+    isa.split('_').any(|part| part == pattern)
+}
+
 /// Parse extensions from ISA string (pure function for testing)
 #[must_use]
 pub fn parse_extensions_compact(isa: &str) -> String {
@@ -131,7 +138,7 @@ pub fn parse_z_extensions_explained(isa: &str) -> Vec<(String, String)> {
     let mut z_exts = Vec::new();
 
     for &(pattern, name, desc, _category) in Z_EXTENSIONS {
-        if isa.contains(pattern) {
+        if isa_has_extension(&isa, pattern) {
             z_exts.push((name.to_string(), desc.to_string()));
         }
     }
@@ -146,7 +153,7 @@ pub fn parse_s_extensions_explained(isa: &str) -> Vec<(String, String)> {
     let mut s_exts = Vec::new();
 
     for &(pattern, name, desc, _category) in S_EXTENSIONS {
-        if isa.contains(pattern) {
+        if isa_has_extension(&isa, pattern) {
             s_exts.push((name.to_string(), desc.to_string()));
         }
     }
@@ -182,7 +189,7 @@ pub fn parse_z_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
     }
 
     for &(pattern, name, desc, category) in Z_EXTENSIONS {
-        if isa.contains(pattern) {
+        if isa_has_extension(&isa, pattern) {
             // Skip if already added (implied by G)
             if !z_exts.iter().any(|e| e.name.eq_ignore_ascii_case(name)) {
                 z_exts.push(ExtensionInfo {
@@ -205,7 +212,7 @@ pub fn parse_s_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
     let mut s_exts = Vec::new();
 
     for &(pattern, name, desc, category) in S_EXTENSIONS {
-        if isa.contains(pattern) {
+        if isa_has_extension(&isa, pattern) {
             s_exts.push(ExtensionInfo {
                 name: name.to_string(),
                 description: desc.to_string(),
@@ -261,7 +268,7 @@ pub fn get_all_z_extensions_with_status(isa: &str) -> Vec<ExtensionInfo> {
         .iter()
         .map(|&(pattern, name, desc, category)| {
             let supported =
-                isa.contains(pattern) || (has_g && (pattern == "zicsr" || pattern == "zifencei"));
+                isa_has_extension(&isa, pattern) || (has_g && (pattern == "zicsr" || pattern == "zifencei"));
             ExtensionInfo {
                 name: name.to_string(),
                 description: desc.to_string(),
@@ -280,7 +287,7 @@ pub fn get_all_s_extensions_with_status(isa: &str) -> Vec<ExtensionInfo> {
     S_EXTENSIONS
         .iter()
         .map(|&(pattern, name, desc, category)| {
-            let supported = isa.contains(pattern);
+            let supported = isa_has_extension(&isa, pattern);
             ExtensionInfo {
                 name: name.to_string(),
                 description: desc.to_string(),
@@ -317,8 +324,9 @@ pub fn parse_vector_from_isa(isa: &str) -> Option<String> {
     let base = isa.split('_').next().unwrap_or(&isa);
     let ext_part = strip_rv_prefix(base);
 
-    // Check for V extension in the extension part, or zve in Z-extensions
-    if !ext_part.contains('v') && !isa.contains("zve") {
+    // Check for V extension in the extension part, or zve* in Z-extensions
+    let has_zve = isa.split('_').any(|part| part.starts_with("zve"));
+    if !ext_part.contains('v') && !has_zve {
         return None;
     }
 
@@ -326,29 +334,29 @@ pub fn parse_vector_from_isa(isa: &str) -> Option<String> {
 
     // Detect VLEN from zvl* extensions (use largest value)
     // If no zvl* specified, VLEN is implementation-defined (do not display)
-    if isa.contains("zvl65536b") {
+    if isa_has_extension(&isa, "zvl65536b") {
         details.push("VLEN>=65536".to_string());
-    } else if isa.contains("zvl32768b") {
+    } else if isa_has_extension(&isa, "zvl32768b") {
         details.push("VLEN>=32768".to_string());
-    } else if isa.contains("zvl16384b") {
+    } else if isa_has_extension(&isa, "zvl16384b") {
         details.push("VLEN>=16384".to_string());
-    } else if isa.contains("zvl8192b") {
+    } else if isa_has_extension(&isa, "zvl8192b") {
         details.push("VLEN>=8192".to_string());
-    } else if isa.contains("zvl4096b") {
+    } else if isa_has_extension(&isa, "zvl4096b") {
         details.push("VLEN>=4096".to_string());
-    } else if isa.contains("zvl2048b") {
+    } else if isa_has_extension(&isa, "zvl2048b") {
         details.push("VLEN>=2048".to_string());
-    } else if isa.contains("zvl1024b") {
+    } else if isa_has_extension(&isa, "zvl1024b") {
         details.push("VLEN>=1024".to_string());
-    } else if isa.contains("zvl512b") {
+    } else if isa_has_extension(&isa, "zvl512b") {
         details.push("VLEN>=512".to_string());
-    } else if isa.contains("zvl256b") {
+    } else if isa_has_extension(&isa, "zvl256b") {
         details.push("VLEN>=256".to_string());
-    } else if isa.contains("zvl128b") {
+    } else if isa_has_extension(&isa, "zvl128b") {
         details.push("VLEN>=128".to_string());
-    } else if isa.contains("zvl64b") {
+    } else if isa_has_extension(&isa, "zvl64b") {
         details.push("VLEN>=64".to_string());
-    } else if isa.contains("zvl32b") {
+    } else if isa_has_extension(&isa, "zvl32b") {
         details.push("VLEN>=32".to_string());
     }
     // No default VLEN - it's implementation-defined per RISC-V spec
@@ -586,6 +594,62 @@ mod tests {
         let result = parse_vector_from_isa("rv64imafdcv_zvl128b_zvl256b");
         assert!(result.is_some());
         assert!(result.unwrap().contains("VLEN>=256"));
+    }
+
+    // === False positive prevention tests ===
+
+    #[test]
+    fn test_zk_does_not_false_match_zkn() {
+        // "zk" (Scalar Crypto All) must not be reported when only "zkn" is present
+        let isa = "rv64i_zkn";
+        let result = parse_z_extensions_explained(isa);
+        assert!(result.iter().any(|(n, _)| n == "Zkn"), "Zkn should be found");
+        assert!(!result.iter().any(|(n, _)| n == "Zk"), "Zk should NOT be found (false positive)");
+    }
+
+    #[test]
+    fn test_zks_does_not_false_match_zksed() {
+        // "zks" must not be reported when only "zksed" is present
+        let isa = "rv64i_zksed";
+        let result = parse_z_extensions_explained(isa);
+        assert!(result.iter().any(|(n, _)| n == "Zksed"), "Zksed should be found");
+        assert!(!result.iter().any(|(n, _)| n == "Zks"), "Zks should NOT be found (false positive)");
+        assert!(!result.iter().any(|(n, _)| n == "Zk"), "Zk should NOT be found (false positive)");
+    }
+
+    #[test]
+    fn test_s_extension_no_collision_with_z() {
+        // S-extensions should not appear when only Z-extensions with 's' in name are present
+        let isa = "rv64i_zbs_zks";
+        let result = parse_s_extensions_explained(isa);
+        assert!(result.is_empty(), "No S-extensions should be found in Z-only ISA: {:?}", result);
+    }
+
+    #[test]
+    fn test_s_extension_exact_match() {
+        // "sstc" should match exactly, not as substring
+        let isa = "rv64i_sstc_svnapot";
+        let result = parse_s_extensions_explained(isa);
+        assert!(result.iter().any(|(n, _)| n == "Sstc"), "Sstc should be found");
+        assert!(result.iter().any(|(n, _)| n == "Svnapot"), "Svnapot should be found");
+    }
+
+    #[test]
+    fn test_zvks_does_not_false_match_zvksc() {
+        // "zvks" must not be reported when only "zvksc" is present
+        let isa = "rv64iv_zvksc";
+        let result = parse_z_extensions_explained(isa);
+        assert!(result.iter().any(|(n, _)| n == "Zvksc"), "Zvksc should be found");
+        assert!(!result.iter().any(|(n, _)| n == "Zvks"), "Zvks should NOT be found (false positive)");
+    }
+
+    #[test]
+    fn test_zicsr_not_false_positive_for_c() {
+        // Having "zicsr" in the ISA should not cause "C" to appear in standard extensions
+        // (C should only come from the base part before underscores)
+        let isa = "rv64ima_zicsr";
+        let result = parse_extensions_compact(isa);
+        assert_eq!(result, "I M A", "C should not appear from zicsr");
     }
 
     #[test]
