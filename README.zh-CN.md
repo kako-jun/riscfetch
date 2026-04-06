@@ -50,7 +50,7 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # 标准输出
-riscfetch -a           # 显示全部144个扩展，带 ✓/✗ 标记
+riscfetch -a           # 显示全部147个扩展，带 ✓/✗ 标记
 riscfetch -a -e        # 全部扩展带说明
 riscfetch -r           # 仅显示 RISC-V 特定信息（排除 OS、内存等）
 riscfetch -e           # 解释每个 ISA 扩展

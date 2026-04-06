@@ -182,7 +182,7 @@ S-Extensions (Supervisor):
 
 ## Output Format (--all Mode)
 
-Shows ALL defined extensions (144 total) with checkmarks indicating support status:
+Shows ALL defined extensions (147 total) with checkmarks indicating support status:
 
 - `✓` (green, bold) = Supported by this CPU
 - `✗` (gray/dim) = Not supported
