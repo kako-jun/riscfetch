@@ -17,7 +17,7 @@ RISC-V システム情報ツール。ISA 拡張、hart 数、ハードウェア 
 
 - **144 拡張に対応**（Z 拡張 98 種 + S 拡張 46 種）
 - **カテゴリ別表示**で見やすい出力
-- **13 種類のベンダーロゴ**（Pine64、WCH 含む）
+- **15 種類のベンダーロゴ**（ESWIN、UltraRISC 含む）
 - スクリプト向け JSON 出力
 - 詳細説明モード (`-e`)
 
@@ -98,7 +98,7 @@ User:       user@visionfive2
 | `-l, --logo <VENDOR>` | ベンダーロゴ（下記参照） |
 | `--style <STYLE>` | ロゴスタイル: normal, small, none |
 
-### 対応ベンダー（13 種類）
+### 対応ベンダー（15 種類）
 
 | ベンダー | 説明 |
 |----------|------|
@@ -109,6 +109,8 @@ User:       user@visionfive2
 | `milkv` | Milk-V (Duo, Mars, Pioneer) |
 | `sipeed` | Sipeed (Lichee, Maix シリーズ) |
 | `pine64` | Pine64 (Star64, Oz64) |
+| `eswin` | ESWIN (EIC7700X, EIC7702X) |
+| `ultrarisc` | UltraRISC (UR-DP1000) |
 | `kendryte` | Kendryte/Canaan (K210, K510) |
 | `allwinner` | Allwinner (D1) |
 | `espressif` | Espressif (ESP32-C3, C6) |

@@ -17,7 +17,7 @@ System information tool for RISC-V. Displays ISA extensions, hart count, hardwar
 
 - **144 extensions supported** (98 Z-extensions + 46 S-extensions)
 - **Category-based display** for easy reading
-- **13 vendor logos** including Pine64 and WCH
+- **15 vendor logos** including ESWIN and UltraRISC
 - JSON output for scripting
 - Detailed explanation mode (`-e`)
 
@@ -98,7 +98,7 @@ User:       user@visionfive2
 | `-l, --logo <VENDOR>` | Vendor logo (see below) |
 | `--style <STYLE>` | Logo style: normal, small, none |
 
-### Supported Vendors (13)
+### Supported Vendors (15)
 
 | Vendor | Description |
 |--------|-------------|
@@ -109,6 +109,8 @@ User:       user@visionfive2
 | `milkv` | Milk-V (Duo, Mars, Pioneer) |
 | `sipeed` | Sipeed (Lichee, Maix series) |
 | `pine64` | Pine64 (Star64, Oz64) |
+| `eswin` | ESWIN (EIC7700X, EIC7702X) |
+| `ultrarisc` | UltraRISC (UR-DP1000) |
 | `kendryte` | Kendryte/Canaan (K210, K510) |
 | `allwinner` | Allwinner (D1) |
 | `espressif` | Espressif (ESP32-C3, C6) |

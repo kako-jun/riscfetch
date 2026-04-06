@@ -352,6 +352,8 @@ Total score: 1234
 | milkv | Milk-V (Duo, Mars, Pioneer) |
 | sipeed | Sipeed (Lichee, Maix series) |
 | pine64 | Pine64 (Star64, Oz64) |
+| eswin | ESWIN (EIC7700X, EIC7702X) |
+| ultrarisc | UltraRISC (UR-DP1000) |
 | kendryte | Kendryte/Canaan (K210, K510) |
 | allwinner | Allwinner (D1) |
 | espressif | Espressif (ESP32-C3, C6) |
@@ -382,7 +384,7 @@ RISC-V architecture information display tool
 Usage: riscfetch [OPTIONS]
 
 Options:
-  -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, kendryte, allwinner, espressif, spacemit, sophgo, wch)
+  -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, eswin, ultrarisc, kendryte, allwinner, espressif, spacemit, sophgo, wch)
       --style <STYLE>   Logo style (normal, small, none)
   -b, --benchmark       Run simple benchmarks
   -e, --explain         Show detailed explanation of each ISA extension
