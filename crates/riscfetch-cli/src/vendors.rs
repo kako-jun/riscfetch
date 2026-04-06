@@ -29,6 +29,8 @@ pub const VENDORS: &[(&[&str], &str, &str)] = &[
     (&["sipeed"], "Sipeed", "RISC-V by Sipeed"),
     (&["pine64", "pine"], "Pine64", "RISC-V by Pine64"),
     // SoC Vendors
+    (&["eswin"], "ESWIN", "RISC-V by ESWIN"),
+    (&["ultrarisc"], "UltraRISC", "RISC-V by UltraRISC"),
     (&["kendryte", "canaan"], "Kendryte", "RISC-V by Kendryte"),
     (&["allwinner"], "Allwinner", "RISC-V by Allwinner"),
     (&["espressif", "esp"], "Espressif", "RISC-V by Espressif"),
@@ -62,34 +64,52 @@ pub fn get_default_vendor() -> (&'static str, &'static str) {
 /// Detection keywords for auto-detecting vendor from board/compatible strings.
 /// Broader than CLI aliases — includes board names and SoC identifiers.
 /// Format: (keyword, vendor_primary_alias)
+///
+/// **Order matters**: more specific keywords (SoC IDs, board names) must come
+/// before generic vendor names. The first match wins, so e.g. "eic7700" (ESWIN)
+/// must precede "sifive" to correctly identify HiFive Premier P550.
 const VENDOR_KEYWORDS: &[(&str, &str)] = &[
-    ("sifive", "sifive"),
-    ("hifive", "sifive"),
-    ("starfive", "starfive"),
+    // SoC / board-specific (most specific first)
+    ("eic7700", "eswin"),
+    ("eic7702", "eswin"),
+    ("ebc77", "eswin"),
+    ("hifive premier", "eswin"),
+    ("p550", "eswin"),
+    ("starpro64", "eswin"),
+    ("megrez", "eswin"),
+    ("dc-roma", "eswin"),
+    ("ur-dp1000", "ultrarisc"),
+    ("urdp1000", "ultrarisc"),
+    ("titan", "ultrarisc"),
     ("visionfive", "starfive"),
     ("jh7110", "starfive"),
+    ("xuantie", "thead"),
+    ("lichee", "sipeed"),
+    ("maix", "sipeed"),
+    ("star64", "pine64"),
+    ("nezha", "allwinner"),
+    ("esp32", "espressif"),
+    ("cv1800", "sophgo"),
+    ("sg2000", "sophgo"),
+    ("ch32v", "wch"),
+    // Vendor names (generic, checked after specific keywords)
+    ("eswin", "eswin"),
+    ("ultrarisc", "ultrarisc"),
+    ("sifive", "sifive"),
+    ("starfive", "starfive"),
     ("thead", "thead"),
     ("t-head", "thead"),
-    ("xuantie", "thead"),
     ("milkv", "milkv"),
     ("milk-v", "milkv"),
     ("sipeed", "sipeed"),
-    ("lichee", "sipeed"),
-    ("maix", "sipeed"),
     ("pine64", "pine64"),
-    ("star64", "pine64"),
     ("kendryte", "kendryte"),
     ("canaan", "kendryte"),
     ("allwinner", "allwinner"),
-    ("nezha", "allwinner"),
     ("espressif", "espressif"),
-    ("esp32", "espressif"),
     ("spacemit", "spacemit"),
     ("sophgo", "sophgo"),
-    ("cv1800", "sophgo"),
-    ("sg2000", "sophgo"),
     ("wch", "wch"),
-    ("ch32v", "wch"),
     ("winchiphead", "wch"),
 ];
 
@@ -158,6 +178,14 @@ mod tests {
         // WCH
         let (name, _) = get_vendor_info("wch").unwrap();
         assert_eq!(name, "WCH");
+
+        // ESWIN
+        let (name, _) = get_vendor_info("eswin").unwrap();
+        assert_eq!(name, "ESWIN");
+
+        // UltraRISC
+        let (name, _) = get_vendor_info("ultrarisc").unwrap();
+        assert_eq!(name, "UltraRISC");
     }
 
     #[test]
@@ -177,8 +205,28 @@ mod tests {
     }
 
     #[test]
+    fn test_detect_eswin_boards() {
+        assert_eq!(detect_vendor("", "eswin,eic7700x"), Some("eswin"));
+        assert_eq!(detect_vendor("Pine64 StarPro64", ""), Some("eswin"));
+        assert_eq!(detect_vendor("Milk-V Megrez", ""), Some("eswin"));
+        assert_eq!(detect_vendor("DeepComputing DC-ROMA II", ""), Some("eswin"));
+        assert_eq!(detect_vendor("ESWIN EBC7702", ""), Some("eswin"));
+    }
+
+    #[test]
+    fn test_detect_ultrarisc_boards() {
+        assert_eq!(detect_vendor("Milk-V Titan", ""), Some("ultrarisc"));
+        assert_eq!(detect_vendor("", "ultrarisc,ur-dp1000"), Some("ultrarisc"));
+    }
+
+    #[test]
     fn test_detect_vendor_case_insensitive() {
         assert_eq!(detect_vendor("SIFIVE HIFIVE UNMATCHED", ""), Some("sifive"));
+        // HiFive Premier P550 uses ESWIN EIC7700X, not SiFive silicon
+        assert_eq!(
+            detect_vendor("SiFive HiFive Premier P550", ""),
+            Some("eswin")
+        );
     }
 
     #[test]
