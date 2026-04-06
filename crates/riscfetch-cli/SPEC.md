@@ -352,6 +352,8 @@ Total score: 1234
 | milkv | Milk-V (Duo, Mars, Pioneer) |
 | sipeed | Sipeed (Lichee, Maix series) |
 | pine64 | Pine64 (Star64, Oz64) |
+| eswin | ESWIN (EIC7700X, EIC7702X) |
+| ultrarisc | UltraRISC (UR-DP1000) |
 | kendryte | Kendryte/Canaan (K210, K510) |
 | allwinner | Allwinner (D1) |
 | espressif | Espressif (ESP32-C3, C6) |
