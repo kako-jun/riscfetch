@@ -384,7 +384,7 @@ RISC-V architecture information display tool
 Usage: riscfetch [OPTIONS]
 
 Options:
-  -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, kendryte, allwinner, espressif, spacemit, sophgo, wch)
+  -l, --logo <VENDOR>   Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, eswin, ultrarisc, kendryte, allwinner, espressif, spacemit, sophgo, wch)
       --style <STYLE>   Logo style (normal, small, none)
   -b, --benchmark       Run simple benchmarks
   -e, --explain         Show detailed explanation of each ISA extension

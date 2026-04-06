@@ -74,13 +74,13 @@ const VENDOR_KEYWORDS: &[(&str, &str)] = &[
     ("eic7702", "eswin"),
     ("ebc77", "eswin"),
     ("hifive premier", "eswin"),
-    ("p550", "eswin"),
     ("starpro64", "eswin"),
     ("megrez", "eswin"),
     ("dc-roma", "eswin"),
     ("ur-dp1000", "ultrarisc"),
     ("urdp1000", "ultrarisc"),
-    ("titan", "ultrarisc"),
+    ("milkv titan", "ultrarisc"),
+    ("milk-v titan", "ultrarisc"),
     ("visionfive", "starfive"),
     ("jh7110", "starfive"),
     ("xuantie", "thead"),
@@ -95,6 +95,7 @@ const VENDOR_KEYWORDS: &[(&str, &str)] = &[
     // Vendor names (generic, checked after specific keywords)
     ("eswin", "eswin"),
     ("ultrarisc", "ultrarisc"),
+    ("hifive", "sifive"),
     ("sifive", "sifive"),
     ("starfive", "starfive"),
     ("thead", "thead"),
@@ -217,6 +218,13 @@ mod tests {
     fn test_detect_ultrarisc_boards() {
         assert_eq!(detect_vendor("Milk-V Titan", ""), Some("ultrarisc"));
         assert_eq!(detect_vendor("", "ultrarisc,ur-dp1000"), Some("ultrarisc"));
+    }
+
+    #[test]
+    fn test_hifive_unmatched_still_sifive() {
+        // HiFive Unmatched uses SiFive FU740, not ESWIN
+        assert_eq!(detect_vendor("HiFive Unmatched", ""), Some("sifive"));
+        assert_eq!(detect_vendor("HiFive Unleashed", ""), Some("sifive"));
     }
 
     #[test]
