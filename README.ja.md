@@ -15,7 +15,7 @@ RISC-V システム情報ツール。ISA 拡張、hart 数、ハードウェア 
 
 ## 特徴
 
-- **144 拡張に対応**（Z 拡張 98 種 + S 拡張 46 種）
+- **147 拡張に対応**（Z 拡張 100 種 + S 拡張 47 種）
 - **カテゴリ別表示**で見やすい出力
 - **13 種類のベンダーロゴ**（Pine64、WCH 含む）
 - スクリプト向け JSON 出力
@@ -50,7 +50,7 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # 標準出力
-riscfetch -a           # 全144拡張を ✓/✗ で表示
+riscfetch -a           # 全147拡張を ✓/✗ で表示
 riscfetch -a -e        # 全拡張を説明付きで表示
 riscfetch -r           # RISC-V 固有情報のみ（OS、メモリ等を除外）
 riscfetch -e           # 各 ISA 拡張の説明を表示
@@ -92,7 +92,7 @@ User:       user@visionfive2
 |--------|------|
 | `-r, --riscv-only` | RISC-V 固有情報のみ表示（OS、メモリ、稼働時間を除外） |
 | `-e, --explain` | 各拡張の意味を表示 |
-| `-a, --all` | 全144拡張を ✓/✗ チェックマーク付きで表示 |
+| `-a, --all` | 全147拡張を ✓/✗ チェックマーク付きで表示 |
 | `-j, --json` | 機械可読な JSON 出力 |
 | `-b, --benchmark` | ISA 固有のベンチマーク |
 | `-l, --logo <VENDOR>` | ベンダーロゴ（下記参照） |
