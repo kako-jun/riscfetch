@@ -75,9 +75,9 @@ pub const Z_EXTENSIONS: &[(&str, &str, &str, &str)] = &[
     ("zcmp", "Zcmp", "Compressed Push/Pop", "comp"),
     ("zcmt", "Zcmt", "Compressed Table Jump", "comp"),
     // Atomics
-    ("zacas", "Zacas", "Atomic Compare-and-Swap", "atomic"),
-    ("zabha", "Zabha", "Atomic Byte/Halfword", "atomic"),
     ("zaamo", "Zaamo", "Atomic AMO Subset", "atomic"),
+    ("zabha", "Zabha", "Atomic Byte/Halfword", "atomic"),
+    ("zacas", "Zacas", "Atomic Compare-and-Swap", "atomic"),
     ("zalasr", "Zalasr", "Load-Acquire/Store-Release", "atomic"),
     ("zalrsc", "Zalrsc", "Atomic LR/SC Subset", "atomic"),
     ("zawrs", "Zawrs", "Wait-on-Reservation-Set", "atomic"),

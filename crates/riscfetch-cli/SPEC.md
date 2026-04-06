@@ -444,5 +444,5 @@ Example: `riscfetch 0.2.0`
 
 - Spec version: 2.1
 - Last updated: 2025-12
-- Based on RISC-V ISA spec version: 2025-11-26
+- Based on RISC-V ISA spec version: 2026-04
 - Supports 100 Z-extensions and 47 S-extensions (147 total)

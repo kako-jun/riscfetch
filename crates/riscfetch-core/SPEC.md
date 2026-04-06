@@ -318,5 +318,5 @@ parse_extensions_compact("rv64gc") → "I M A F D C"  (not "G C")
 
 - Spec version: 2.0
 - Last updated: 2025-12
-- Based on RISC-V ISA spec version: 2025-11-26 (Unprivileged/Privileged)
-- Reference: LLVM 22.0 RISC-V extension support
+- Based on RISC-V ISA spec version: 2026-04 (Unprivileged/Privileged)
+- Reference: LLVM mainline RISC-V extension support
