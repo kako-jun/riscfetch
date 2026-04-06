@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.3.0] - 2026-04-06
+
+### Added
+- ESWIN vendor support (EIC7700X, EIC7702X SoCs — HiFive Premier P550, StarPro64, Milk-V Megrez, DC-ROMA II, EBC7700/7702)
+- UltraRISC vendor support (UR-DP1000 SoC — Milk-V Titan)
+- 3 ratified ISA extensions: Zalasr (Load-Acquire/Store-Release), Zce (Compressed for Embedded), Svrsw60t59b (PTE bits 60-59)
+
+### Changed
+- Detection keyword ordering: SoC/board-specific keywords now take priority over generic vendor names
+- Extension count: 144 → 147 (100 Z + 47 S)
+- Vendor count: 13 → 15
+
 ## [2.2.0] - 2026-02-16
 
 ### Added
