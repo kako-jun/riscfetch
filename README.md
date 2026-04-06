@@ -15,7 +15,7 @@ System information tool for RISC-V. Displays ISA extensions, hart count, hardwar
 
 ## Features
 
-- **144 extensions supported** (98 Z-extensions + 46 S-extensions)
+- **147 extensions supported** (100 Z-extensions + 47 S-extensions)
 - **Category-based display** for easy reading
 - **15 vendor logos** including ESWIN and UltraRISC
 - JSON output for scripting
@@ -50,7 +50,7 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # standard output
-riscfetch -a           # show all 144 extensions with ✓/✗
+riscfetch -a           # show all 147 extensions with ✓/✗
 riscfetch -a -e        # all extensions with descriptions
 riscfetch -r           # RISC-V info only (no OS, memory, etc.)
 riscfetch -e           # explain each ISA extension
@@ -92,7 +92,7 @@ User:       user@visionfive2
 |------|-------------|
 | `-r, --riscv-only` | Show only RISC-V specific info (exclude OS, memory, uptime) |
 | `-e, --explain` | Show meaning of each extension |
-| `-a, --all` | Show all 144 extensions with ✓/✗ checkmarks |
+| `-a, --all` | Show all 147 extensions with ✓/✗ checkmarks |
 | `-j, --json` | Machine-readable JSON output |
 | `-b, --benchmark` | ISA-specific benchmarks |
 | `-l, --logo <VENDOR>` | Vendor logo (see below) |

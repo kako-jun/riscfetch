@@ -1,7 +1,7 @@
 //! RISC-V extension definitions
 //!
 //! This module contains the constant definitions for all supported RISC-V extensions.
-//! Based on RISC-V ISA specification (2025-11-26) and LLVM 22.0 support.
+//! Based on RISC-V ISA specification (2026-04) and LLVM mainline support.
 
 /// Standard extension definitions
 /// Format: (char, name, description)
@@ -68,15 +68,17 @@ pub const Z_EXTENSIONS: &[(&str, &str, &str, &str)] = &[
     ("zca", "Zca", "Compressed Base", "comp"),
     ("zcb", "Zcb", "Compressed Basic Ops", "comp"),
     ("zcd", "Zcd", "Compressed Double FP", "comp"),
+    ("zce", "Zce", "Compressed for Embedded", "comp"),
     ("zcf", "Zcf", "Compressed Single FP", "comp"),
+    ("zclsd", "Zclsd", "Compressed LD/SD Pair", "comp"),
+    ("zcmop", "Zcmop", "Compressed May-Be-Ops", "comp"),
     ("zcmp", "Zcmp", "Compressed Push/Pop", "comp"),
     ("zcmt", "Zcmt", "Compressed Table Jump", "comp"),
-    ("zcmop", "Zcmop", "Compressed May-Be-Ops", "comp"),
-    ("zclsd", "Zclsd", "Compressed LD/SD Pair", "comp"),
     // Atomics
-    ("zacas", "Zacas", "Atomic Compare-and-Swap", "atomic"),
-    ("zabha", "Zabha", "Atomic Byte/Halfword", "atomic"),
     ("zaamo", "Zaamo", "Atomic AMO Subset", "atomic"),
+    ("zabha", "Zabha", "Atomic Byte/Halfword", "atomic"),
+    ("zacas", "Zacas", "Atomic Compare-and-Swap", "atomic"),
+    ("zalasr", "Zalasr", "Load-Acquire/Store-Release", "atomic"),
     ("zalrsc", "Zalrsc", "Atomic LR/SC Subset", "atomic"),
     ("zawrs", "Zawrs", "Wait-on-Reservation-Set", "atomic"),
     // Memory Model
@@ -146,6 +148,7 @@ pub const S_EXTENSIONS: &[(&str, &str, &str, &str)] = &[
     ("svade", "Svade", "A/D Update on Fault", "vm"),
     ("svadu", "Svadu", "A/D Hardware Update", "vm"),
     ("svbare", "Svbare", "Bare Translation Mode", "vm"),
+    ("svrsw60t59b", "Svrsw60t59b", "PTE Bits 60-59 for SW", "vm"),
     ("svvptc", "Svvptc", "VPTC Invalidation", "vm"),
     // Supervisor (Ss*)
     ("ssaia", "Ssaia", "Adv Interrupt Arch", "sup"),

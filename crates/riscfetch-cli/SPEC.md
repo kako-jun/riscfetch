@@ -182,7 +182,7 @@ S-Extensions (Supervisor):
 
 ## Output Format (--all Mode)
 
-Shows ALL defined extensions (144 total) with checkmarks indicating support status:
+Shows ALL defined extensions (147 total) with checkmarks indicating support status:
 
 - `✓` (green, bold) = Supported by this CPU
 - `✗` (gray/dim) = Not supported
@@ -446,5 +446,5 @@ Example: `riscfetch 0.2.0`
 
 - Spec version: 2.1
 - Last updated: 2025-12
-- Based on RISC-V ISA spec version: 2025-11-26
-- Supports 98 Z-extensions and 46 S-extensions (144 total)
+- Based on RISC-V ISA spec version: 2026-04
+- Supports 100 Z-extensions and 47 S-extensions (147 total)
