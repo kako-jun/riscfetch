@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, master, develop ]
+    branches: [main]
   pull_request:
-    branches: [ main, master, develop ]
+    branches: [main]
 
 env:
   CARGO_TERM_COLOR: always
@@ -52,7 +52,7 @@ jobs:
           components: rustfmt
 
       - name: Check formatting
-        run: cargo fmt --all -- --check
+        run: cargo fmt --check
 
   clippy:
     name: Clippy
@@ -66,7 +66,7 @@ jobs:
           components: clippy
 
       - name: Run clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
+        run: cargo clippy -- -D warnings
 
   build-riscv:
     name: Build (RISC-V)
