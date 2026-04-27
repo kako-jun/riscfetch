@@ -92,6 +92,7 @@ const VENDOR_KEYWORDS: &[(&str, &str)] = &[
     ("cv1800", "sophgo"),
     ("sg2000", "sophgo"),
     ("ch32v", "wch"),
+    ("ky,x1", "spacemit"),
     // Vendor names (generic, checked after specific keywords)
     ("eswin", "eswin"),
     ("ultrarisc", "ultrarisc"),
@@ -240,6 +241,22 @@ mod tests {
     #[test]
     fn test_detect_vendor_unknown_board() {
         assert_eq!(detect_vendor("Some Unknown Board", "unknown,board"), None);
+    }
+
+    #[test]
+    fn test_detect_orangepi_rv2_as_spacemit() {
+        assert_eq!(
+            detect_vendor("ky x1 orangepi-rv2 board", "ky,orangepi-rv2 ky,x1"),
+            Some("spacemit")
+        );
+    }
+
+    #[test]
+    fn test_ky_orangepi_alone_does_not_match() {
+        // We deliberately key on "ky,x1" only. A bare "ky,orangepi-rv2" without
+        // "ky,x1" is rejected so future Ky-derived boards on non-SpacemiT SoCs
+        // are not silently miscategorized.
+        assert_eq!(detect_vendor("", "ky,orangepi-rv2"), None);
     }
 
     #[test]
