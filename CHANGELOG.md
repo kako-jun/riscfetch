@@ -2,10 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.3.1] - 2026-04-27
 
 ### Fixed
-- Detect Orange Pi RV2 (SpacemiT K1) as SpacemiT vendor. Ky-derived kernels expose `ky,x1` / `ky,orangepi-rv2` in `/proc/device-tree/compatible` instead of `spacemit,*`, so the existing `spacemit` keyword missed them and the board fell back to the generic RISC-V logo.
+- Detect Orange Pi RV2 (SpacemiT K1) as SpacemiT vendor. Ky-derived kernels expose `ky,x1` / `ky,orangepi-rv2` in `/proc/device-tree/compatible` instead of `spacemit,*`, so the existing `spacemit` keyword missed them and the board fell back to the generic RISC-V logo. (#11, #12)
 
 ## [2.3.0] - 2026-04-06
 
