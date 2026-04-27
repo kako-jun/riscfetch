@@ -252,6 +252,14 @@ mod tests {
     }
 
     #[test]
+    fn test_ky_orangepi_alone_does_not_match() {
+        // We deliberately key on "ky,x1" only. A bare "ky,orangepi-rv2" without
+        // "ky,x1" is rejected so future Ky-derived boards on non-SpacemiT SoCs
+        // are not silently miscategorized.
+        assert_eq!(detect_vendor("", "ky,orangepi-rv2"), None);
+    }
+
+    #[test]
     fn test_all_vendors_have_info() {
         for (aliases, display_name, subtitle) in VENDORS {
             assert!(!aliases.is_empty(), "Vendor must have at least one alias");
