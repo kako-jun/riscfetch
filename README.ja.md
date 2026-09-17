@@ -68,9 +68,10 @@ riscfetch -l pine64    # Pine64 ロゴを使用
 
 ```
 ISA:        rv64imafdcv_zicsr_zifencei_zba_zbb_zbs_sstc...
-Ext:        I M A F D C V
+Ext:        I M A F D C V (B)
 Z-Base:     Zicsr Zifencei Zicntr Zihpm
 Z-Bit:      Zba Zbb Zbc Zbs
+Z-Multiply: (Zmmul)
 Z-Vector:   Zvl128b Zvl256b
 S-Sup:      Sstc
 Vector:     Enabled, VLEN>=256
@@ -87,6 +88,8 @@ Memory:     3.45 GiB / 8.00 GiB
 Uptime:     3h 42m
 User:       user@visionfive2
 ```
+
+**括弧付き**で表示される拡張（`(B)` や `(Zmmul)` など）は、`/proc/cpuinfo` に直接は載っていないものの、他に存在する拡張から導かれる（含意される）拡張です。例えば `Zba`+`Zbb`+`Zbs` が揃っていれば `B` を、`M` があれば `Zmmul` を意味します。それ以外はカーネルが実際に列挙した拡張そのままです。
 
 ## オプション
 

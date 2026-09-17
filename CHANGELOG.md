@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.5.0] - 2026-09-17
+
+### Added
+- Extension implication and composition: extensions that are architecturally implied by others actually present, but that `/proc/cpuinfo` didn't enumerate directly (e.g. `Zba`+`Zbb`+`Zbs` present but `B` missing, `M` present but `Zmmul` missing), are now computed and shown in parentheses, e.g. `Ext: I M A F D C V (B)` / `Z-Multiply: (Zmmul)`. Sourced from LLVM mainline's `RISCVFeatures.td` `Implies` tables and the RISC-V ISA manual's shorthand-extension definitions (#10)
+- `ExtensionInfo.derived` / `ExtensionEntry.derived` fields (additive) marking whether an extension was reported directly (`false`) or inferred (`true`); `--json` output includes the same field
+
+### Changed
+- `--help` now includes a line explaining the parentheses notation for derived extensions
+- `riscfetch-core` bumped to **3.0.0**: adding the required `derived: bool` field to the
+  public, non-`#[non_exhaustive]` `ExtensionEntry`/`ExtensionInfo` structs is additive for
+  JSON consumers but breaks any Rust caller constructing these structs by literal, so
+  semver requires a major bump for the library even though the CLI itself is 2.5.0
+
 ## [2.4.0] - 2026-09-17
 
 ### Added

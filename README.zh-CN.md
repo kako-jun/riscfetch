@@ -68,9 +68,10 @@ riscfetch -l pine64    # 使用 Pine64 logo
 
 ```
 ISA:        rv64imafdcv_zicsr_zifencei_zba_zbb_zbs_sstc...
-Ext:        I M A F D C V
+Ext:        I M A F D C V (B)
 Z-Base:     Zicsr Zifencei Zicntr Zihpm
 Z-Bit:      Zba Zbb Zbc Zbs
+Z-Multiply: (Zmmul)
 Z-Vector:   Zvl128b Zvl256b
 S-Sup:      Sstc
 Vector:     Enabled, VLEN>=256
@@ -87,6 +88,8 @@ Memory:     3.45 GiB / 8.00 GiB
 Uptime:     3h 42m
 User:       user@visionfive2
 ```
+
+带**括号**显示的扩展（例如 `(B)` 或 `(Zmmul)`）并未直接出现在 `/proc/cpuinfo` 中，而是根据当前已有的其他扩展推导（隐含）得出的。例如 `Zba`+`Zbb`+`Zbs` 齐全即隐含 `B`，有 `M` 即隐含 `Zmmul`。其余扩展均为内核实际列出的原始内容。
 
 ## 选项
 

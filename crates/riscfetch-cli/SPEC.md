@@ -67,10 +67,11 @@ Extensions are grouped by category for better readability:
 
 ```
 ISA:        rv64imafdcv_zicbom_zicboz_zicntr_zicsr_zifencei_...
-Ext:        I M A F D C V
+Ext:        I M A F D C V (B)
 Z-Base:     Zicsr Zifencei Zicntr Zihpm
 Z-Bit:      Zba Zbb Zbc Zbs
 Z-Cache:    Zicbom Zicboz
+Z-Multiply: (Zmmul)
 Z-Vector:   Zvl128b Zvl256b
 S-Sup:      Sstc
 Vector:     Enabled, VLEN>=256
@@ -88,14 +89,19 @@ Uptime:     3h 42m
 User:       user@spacemit
 ```
 
+Extensions shown in **parentheses** (e.g. `(B)`, `(Zmmul)`) were not reported directly by
+`/proc/cpuinfo` but are implied by other extensions that are present — see "Derived
+Extensions" in `riscfetch-core/SPEC.md` for the full implication/composition rules and
+sources. Everything not in parentheses is exactly what the kernel enumerated.
+
 ### Field Definitions
 
 | Field | Description | Example |
 |-------|-------------|---------|
 | ISA | Full ISA string from /proc/cpuinfo | `rv64imafdc_zicsr_zifencei` |
-| Ext | Standard extensions (space-separated) | `I M A F D C V` |
-| Z-{Category}: | Z-extensions grouped by category | `Z-Bit: Zba Zbb Zbc Zbs` |
-| S-{Category}: | S-extensions (privileged) by category | `S-Sup: Sstc` |
+| Ext | Standard extensions (space-separated); derived ones in parentheses | `I M A F D C V (B)` |
+| Z-{Category}: | Z-extensions grouped by category; derived ones in parentheses | `Z-Bit: Zba Zbb Zbc Zbs` |
+| S-{Category}: | S-extensions (privileged) by category; derived ones in parentheses | `S-Sup: Sstc` |
 | Vector | Vector extension status and VLEN | `Enabled, VLEN>=256` or empty |
 | Harts | Number of hardware threads | `4 harts` |
 | HW IDs | Hardware identifiers | `vendor:0x489 arch:0x... impl:0x...` |
@@ -153,6 +159,7 @@ Extensions:
   D          Double-Precision Float
   C          Compressed (16-bit)
   V          Vector (SIMD)
+  (B)        Bit Manipulation
 
 Z-Extensions (Base):
   Zicsr      CSR Instructions
@@ -169,6 +176,9 @@ Z-Extensions (Bit Manipulation):
 Z-Extensions (Cryptography):
   Zkt        Data-Indep Timing
 
+Z-Extensions (Multiply):
+  (Zmmul)    Multiply Only (no Div)
+
 Z-Extensions (Vector):
   Zvl128b    VLEN >= 128 bits
   Zvl256b    VLEN >= 256 bits
@@ -177,6 +187,9 @@ Z-Extensions (Vector):
 S-Extensions (Supervisor):
   Sstc       Supervisor Timer
 ```
+
+As in compact mode, extensions in parentheses (`(B)`, `(Zmmul)`) are derived via
+implication/composition rather than reported directly.
 
 ---
 
@@ -215,6 +228,10 @@ Z-Extensions (Base):
 
 The `--all` flag can be combined with other options (`-e`, `-l`, `-j`, `-r`, etc.).
 
+Note: `--all` mode's `✓`/`✗` reflects only what `/proc/cpuinfo` reports directly; it does
+not (yet) mark derived extensions differently. Derived (parenthesized) display is a
+default-mode / `--explain` feature only.
+
 ---
 
 ## Output Format (--json Mode)
@@ -223,24 +240,27 @@ The `--all` flag can be combined with other options (`-e`, `-l`, `-j`, `-r`, etc
 
 ```json
 {
-  "isa": "rv64imafdcv_zicsr_zifencei_zba_zbb_sstc",
+  "isa": "rv64imafdcv_zicsr_zifencei_zba_zbb_zbs_sstc",
   "extensions": [
-    {"name": "I", "description": "Base Integer Instructions"},
-    {"name": "M", "description": "Integer Multiply/Divide"},
-    {"name": "A", "description": "Atomic Instructions"},
-    {"name": "F", "description": "Single-Precision Float"},
-    {"name": "D", "description": "Double-Precision Float"},
-    {"name": "C", "description": "Compressed (16-bit)"},
-    {"name": "V", "description": "Vector (SIMD)"}
+    {"name": "I", "description": "Base Integer Instructions", "derived": false},
+    {"name": "M", "description": "Integer Multiply/Divide", "derived": false},
+    {"name": "A", "description": "Atomic Instructions", "derived": false},
+    {"name": "F", "description": "Single-Precision Float", "derived": false},
+    {"name": "D", "description": "Double-Precision Float", "derived": false},
+    {"name": "C", "description": "Compressed (16-bit)", "derived": false},
+    {"name": "V", "description": "Vector (SIMD)", "derived": false},
+    {"name": "B", "description": "Bit Manipulation", "derived": true}
   ],
   "z_extensions": [
-    {"name": "Zicsr", "description": "CSR Instructions"},
-    {"name": "Zifencei", "description": "Instruction-Fetch Fence"},
-    {"name": "Zba", "description": "Address Generation"},
-    {"name": "Zbb", "description": "Basic Bit Manipulation"}
+    {"name": "Zicsr", "description": "CSR Instructions", "derived": false},
+    {"name": "Zifencei", "description": "Instruction-Fetch Fence", "derived": false},
+    {"name": "Zba", "description": "Address Generation", "derived": false},
+    {"name": "Zbb", "description": "Basic Bit Manipulation", "derived": false},
+    {"name": "Zbs", "description": "Single-bit Operations", "derived": false},
+    {"name": "Zmmul", "description": "Multiply Only (no Div)", "derived": true}
   ],
   "s_extensions": [
-    {"name": "Sstc", "description": "Supervisor Timer"}
+    {"name": "Sstc", "description": "Supervisor Timer", "derived": false}
   ],
   "vector": {
     "enabled": true,
@@ -267,6 +287,11 @@ The `--all` flag can be combined with other options (`-e`, `-l`, `-j`, `-r`, etc
   "uptime_seconds": 13320
 }
 ```
+
+`extensions`/`z_extensions`/`s_extensions` entries carry `"derived": true` for
+extensions inferred via implication/composition (issue #10) that `/proc/cpuinfo` did
+not report directly; reported entries have `"derived": false`. This is an additive
+field — existing consumers that only read `name`/`description` are unaffected.
 
 ### Error (on non-RISC-V)
 
@@ -375,11 +400,14 @@ Total score: 1234
 
 Must include:
 - Program description: "RISC-V architecture information display tool"
+- A note explaining the parentheses notation for derived extensions (issue #10)
 - All options with short and long forms
 - Brief description of each option
 
 ```
 RISC-V architecture information display tool
+
+Extensions shown in parentheses, e.g. (B) or (Zmmul), were not reported directly by /proc/cpuinfo but are implied by other extensions that are present (e.g. Zba+Zbb+Zbs implies B).
 
 Usage: riscfetch [OPTIONS]
 
@@ -444,7 +472,7 @@ Example: `riscfetch 0.2.0`
 
 ## Version
 
-- Spec version: 2.1
-- Last updated: 2026-09
+- Spec version: 2.2
+- Last updated: 2026-09-17
 - Based on RISC-V ISA spec version: 2026-09
 - Supports 103 Z-extensions and 48 S-extensions (151 total)
