@@ -10,6 +10,10 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 - `--help` now includes a line explaining the parentheses notation for derived extensions
+- `riscfetch-core` bumped to **3.0.0**: adding the required `derived: bool` field to the
+  public, non-`#[non_exhaustive]` `ExtensionEntry`/`ExtensionInfo` structs is additive for
+  JSON consumers but breaks any Rust caller constructing these structs by literal, so
+  semver requires a major bump for the library even though the CLI itself is 2.5.0
 
 ## [2.4.0] - 2026-09-17
 

@@ -329,8 +329,17 @@ plain functions) has a `derived: bool` field:
 `derived` — a derived extension is still `supported: true`.
 
 `ExtensionEntry` (the JSON-serializable type used by `collect_riscv_info` /
-`collect_all_info`) carries the same `derived: bool` field, additively — existing
-consumers that only read `name`/`description` are unaffected.
+`collect_all_info`) carries the same `derived: bool` field.
+
+Whether this is a breaking change depends on which surface you consume:
+
+- **JSON output**: additive. `derived` is a new field alongside `name`/`description`;
+  existing consumers that only read the fields they already knew about are unaffected.
+- **Rust API**: breaking. Both `ExtensionEntry` and `ExtensionInfo` are public structs
+  with all-public fields and no `#[non_exhaustive]`, so any caller that constructs one by
+  struct literal (`ExtensionEntry { name, description }`) no longer compiles once
+  `derived` is a required field. This is why `riscfetch-core` is versioned 3.0.0 even
+  though the JSON schema change alone would only warrant a minor bump.
 
 ---
 
