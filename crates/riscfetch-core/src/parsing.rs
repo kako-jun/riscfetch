@@ -547,6 +547,30 @@ mod tests {
             .any(|(n, d)| n == "Zbc" && d == "Carry-less Multiply"));
     }
 
+    #[test]
+    fn test_z_explained_ratified_2026_09() {
+        let isa = "rv64i_ziccid_zicfilp_zicfiss";
+        let result = parse_z_extensions_explained(isa);
+        assert!(result
+            .iter()
+            .any(|(n, d)| n == "Ziccid" && d == "Inst/Data Coherence"));
+        assert!(result
+            .iter()
+            .any(|(n, d)| n == "Zicfilp" && d == "CFI Landing Pads"));
+        assert!(result
+            .iter()
+            .any(|(n, d)| n == "Zicfiss" && d == "CFI Shadow Stack"));
+    }
+
+    #[test]
+    fn test_s_explained_sspmp() {
+        let isa = "rv64i_sspmp";
+        let result = parse_s_extensions_explained(isa);
+        assert!(result
+            .iter()
+            .any(|(n, d)| n == "Sspmp" && d == "S-mode Phys Mem Protection"));
+    }
+
     // === parse_vector_from_isa tests ===
 
     #[test]
