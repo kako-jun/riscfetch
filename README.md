@@ -125,10 +125,10 @@ User:       user@visionfive2
 ### Standard Extensions (11)
 I, E, M, A, F, D, Q, C, B, V, H
 
-### Z-Extensions (98)
-Grouped by category: Base, Hints, Cache, Conditional, Bit Manipulation, Cryptography, Floating Point, Compressed, Atomics, Memory Model, Multiply, Vector, Vector Crypto
+### Z-Extensions (103)
+Grouped by category: Base, Hints, Cache, Conditional, Bit Manipulation, Cryptography, Floating Point, Compressed, Atomics, Memory Model, Multiply, Vector, Vector Crypto, Other
 
-### S-Extensions (46)
+### S-Extensions (48)
 Grouped by category: Virtual Memory, Supervisor, Machine, Hypervisor, Debug, User
 
 See [SPEC.md](crates/riscfetch-core/SPEC.md) for the full list.
