@@ -75,3 +75,98 @@ pub fn get_uptime() -> String {
 pub fn get_uptime_seconds() -> u64 {
     System::uptime()
 }
+
+// uname is a child process and /etc/os-release describes the host, so these two
+// readers reported whatever machine the suite happened to run on. The mocks
+// below pin them to chosen values.
+#[cfg(test)]
+#[cfg(all(
+    any(target_arch = "x86_64", target_arch = "aarch64"),
+    any(target_os = "linux", target_os = "macos", target_os = "windows")
+))]
+mod os_tests {
+    use super::*;
+    use shimforge::{mock, Session};
+    use std::io;
+    use std::process::Output;
+
+    fn exit_ok() -> std::process::ExitStatus {
+        #[cfg(unix)]
+        use std::os::unix::process::ExitStatusExt;
+        #[cfg(windows)]
+        use std::os::windows::process::ExitStatusExt;
+        std::process::ExitStatus::from_raw(0)
+    }
+
+    #[test]
+    fn kernel_info_comes_from_uname() {
+        let mut session = Session::new();
+        // The uname binary is never launched; the call that would launch it is.
+        let output = mock!(
+            session,
+            Command::output,
+            fn(&mut Command) -> io::Result<Output>
+        );
+        output.expect().once().returning(|_| {
+            Ok(Output {
+                status: exit_ok(),
+                stdout: b"6.6.63-riscv64\n".to_vec(),
+                stderr: Vec::new(),
+            })
+        });
+        assert_eq!(get_kernel_info(), "6.6.63-riscv64");
+    }
+
+    #[test]
+    fn kernel_info_is_unknown_when_uname_says_nothing() {
+        let mut session = Session::new();
+        let output = mock!(
+            session,
+            Command::output,
+            fn(&mut Command) -> io::Result<Output>
+        );
+        output.expect().once().returning(|_| {
+            Ok(Output {
+                status: exit_ok(),
+                stdout: Vec::new(),
+                stderr: Vec::new(),
+            })
+        });
+        assert_eq!(get_kernel_info(), "Unknown");
+    }
+
+    #[test]
+    fn os_info_reads_the_pretty_name() {
+        let mut session = Session::new();
+        let read = mock!(
+            session,
+            fs::read_to_string::<&str>,
+            fn(&str) -> io::Result<String>
+        );
+        read.expect()
+            .with(|path| *path == "/etc/os-release")
+            .once()
+            .returning(|_| {
+                Ok(
+                    "NAME=\"Debian GNU/Linux\"\nPRETTY_NAME=\"Debian GNU/Linux 12 (bookworm)\"\n"
+                        .to_string(),
+                )
+            });
+        assert_eq!(get_os_info(), "Debian GNU/Linux 12 (bookworm)");
+    }
+
+    #[test]
+    fn os_info_falls_back_without_os_release() {
+        let mut session = Session::new();
+        let read = mock!(
+            session,
+            fs::read_to_string::<&str>,
+            fn(&str) -> io::Result<String>
+        );
+        read.expect()
+            .with(|path| *path == "/etc/os-release")
+            .once()
+            .returning(|_| Err(io::Error::from(io::ErrorKind::NotFound)));
+        assert_eq!(get_os_info(), "Linux");
+    }
+}

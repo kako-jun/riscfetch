@@ -295,6 +295,7 @@ name = "riscfetch-core"
 version = "3.0.0"
 dependencies = [
  "serde",
+ "shimforge",
  "sysinfo",
 ]
 
@@ -351,6 +352,27 @@ dependencies = [
  "ryu",
  "serde",
  "serde_core",
+]
+
+[[package]]
+name = "shimforge"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a56d2bb7bcb2a06926453d86216f65cc8cddf26585171f0f5a9e2bab34d75a7"
+dependencies = [
+ "libc",
+ "shimforge-macros",
+]
+
+[[package]]
+name = "shimforge-macros"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c2faaeecc52d1b5e0e65251aa82d7736cdec69c2a639a1f14fb7d3e2b172c5e4"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

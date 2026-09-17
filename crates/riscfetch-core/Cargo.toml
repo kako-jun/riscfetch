@@ -13,3 +13,8 @@ readme = "README.md"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 sysinfo = "0.31"
+
+# shimforge supports x86-64 and ARM64 only, so it is scoped out of the RISC-V
+# build: cargo build --target riscv64gc-unknown-linux-gnu never resolves it.
+[target.'cfg(all(any(target_arch = "x86_64", target_arch = "aarch64"), any(target_os = "linux", target_os = "macos", target_os = "windows")))'.dev-dependencies]
+shimforge = "=0.1.2"
