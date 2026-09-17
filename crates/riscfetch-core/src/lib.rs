@@ -16,6 +16,7 @@
 
 mod extensions;
 mod hardware;
+mod implications;
 mod parsing;
 mod system;
 mod types;
@@ -30,12 +31,14 @@ pub use extensions::{
 
 // Re-export parsing functions and types
 pub use parsing::{
-    get_all_s_extensions_with_status, get_all_standard_extensions_with_status,
-    get_all_z_extensions_with_status, get_s_category_name, get_z_category_name, group_by_category,
+    compute_derived_extension_names, get_all_s_extensions_with_status,
+    get_all_standard_extensions_with_status, get_all_z_extensions_with_status,
+    get_extensions_with_derived, get_s_category_name, get_z_category_name, group_by_category,
     parse_extensions_compact, parse_extensions_explained, parse_s_extensions,
-    parse_s_extensions_explained, parse_s_extensions_with_category, parse_vector_from_isa,
-    parse_z_extensions, parse_z_extensions_explained, parse_z_extensions_with_category,
-    ExtensionInfo,
+    parse_s_extensions_explained, parse_s_extensions_with_category,
+    parse_s_extensions_with_category_and_derived, parse_vector_from_isa, parse_z_extensions,
+    parse_z_extensions_explained, parse_z_extensions_with_category,
+    parse_z_extensions_with_category_and_derived, ExtensionInfo,
 };
 
 // Re-export hardware functions
@@ -120,6 +123,27 @@ pub fn get_s_extensions_with_category() -> Vec<ExtensionInfo> {
     parse_s_extensions_with_category(&get_isa_string())
 }
 
+/// Get standard extensions, including ones inferred via implication/composition
+/// (issue #10). Inferred entries have `derived: true`.
+#[must_use]
+pub fn get_extensions_with_derived_for_system() -> Vec<ExtensionInfo> {
+    get_extensions_with_derived(&get_isa_string())
+}
+
+/// Get Z-extensions with category info, including ones inferred via
+/// implication/composition (issue #10). Inferred entries have `derived: true`.
+#[must_use]
+pub fn get_z_extensions_with_category_and_derived() -> Vec<ExtensionInfo> {
+    parse_z_extensions_with_category_and_derived(&get_isa_string())
+}
+
+/// Get S-extensions with category info, including ones inferred via
+/// implication/composition (issue #10). Inferred entries have `derived: true`.
+#[must_use]
+pub fn get_s_extensions_with_category_and_derived() -> Vec<ExtensionInfo> {
+    parse_s_extensions_with_category_and_derived(&get_isa_string())
+}
+
 /// Collect RISC-V specific information only (excludes generic system info)
 #[must_use]
 pub fn collect_riscv_info() -> RiscvInfo {
@@ -129,13 +153,21 @@ pub fn collect_riscv_info() -> RiscvInfo {
     sys.refresh_cpu_all();
 
     let isa = get_isa_string();
-    let exts: Vec<ExtensionEntry> = get_extensions_explained()
+    let exts: Vec<ExtensionEntry> = get_extensions_with_derived(&isa)
         .into_iter()
-        .map(|(name, description)| ExtensionEntry { name, description })
+        .map(|e| ExtensionEntry {
+            name: e.name,
+            description: e.description,
+            derived: e.derived,
+        })
         .collect();
-    let z_exts: Vec<ExtensionEntry> = get_z_extensions_explained()
+    let z_exts: Vec<ExtensionEntry> = parse_z_extensions_with_category_and_derived(&isa)
         .into_iter()
-        .map(|(name, description)| ExtensionEntry { name, description })
+        .map(|e| ExtensionEntry {
+            name: e.name,
+            description: e.description,
+            derived: e.derived,
+        })
         .collect();
 
     let hw_ids = get_hardware_ids();
@@ -167,17 +199,29 @@ pub fn collect_all_info() -> SystemInfo {
     sys.refresh_cpu_all();
 
     let isa = get_isa_string();
-    let exts: Vec<ExtensionEntry> = get_extensions_explained()
+    let exts: Vec<ExtensionEntry> = get_extensions_with_derived(&isa)
         .into_iter()
-        .map(|(name, description)| ExtensionEntry { name, description })
+        .map(|e| ExtensionEntry {
+            name: e.name,
+            description: e.description,
+            derived: e.derived,
+        })
         .collect();
-    let z_exts: Vec<ExtensionEntry> = get_z_extensions_explained()
+    let z_exts: Vec<ExtensionEntry> = parse_z_extensions_with_category_and_derived(&isa)
         .into_iter()
-        .map(|(name, description)| ExtensionEntry { name, description })
+        .map(|e| ExtensionEntry {
+            name: e.name,
+            description: e.description,
+            derived: e.derived,
+        })
         .collect();
-    let s_exts: Vec<ExtensionEntry> = get_s_extensions_explained()
+    let s_exts: Vec<ExtensionEntry> = parse_s_extensions_with_category_and_derived(&isa)
         .into_iter()
-        .map(|(name, description)| ExtensionEntry { name, description })
+        .map(|e| ExtensionEntry {
+            name: e.name,
+            description: e.description,
+            derived: e.derived,
+        })
         .collect();
 
     let hw_ids = get_hardware_ids();

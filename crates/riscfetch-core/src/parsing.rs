@@ -3,6 +3,8 @@
 use crate::extensions::{
     STANDARD_EXTENSIONS, S_CATEGORY_NAMES, S_EXTENSIONS, Z_CATEGORY_NAMES, Z_EXTENSIONS,
 };
+use crate::implications::compute_derived;
+use std::collections::BTreeSet;
 
 /// Extension info with category and support status
 #[derive(Debug, Clone)]
@@ -11,6 +13,11 @@ pub struct ExtensionInfo {
     pub description: String,
     pub category: String,
     pub supported: bool,
+    /// `true` if this extension was not reported directly in the ISA string but was
+    /// inferred through implication or composition from other extensions that are
+    /// present (see the `implications` module). `supported` keeps its existing meaning
+    /// regardless of this flag: a derived extension is still "supported".
+    pub derived: bool,
 }
 
 /// Strip rv32/rv64 prefix from ISA base part to get extension letters only
@@ -179,12 +186,14 @@ pub fn parse_z_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
             description: "CSR Instructions".to_string(),
             category: "base".to_string(),
             supported: true,
+            derived: false,
         });
         z_exts.push(ExtensionInfo {
             name: "Zifencei".to_string(),
             description: "Instruction-Fetch Fence".to_string(),
             category: "base".to_string(),
             supported: true,
+            derived: false,
         });
     }
 
@@ -197,6 +206,7 @@ pub fn parse_z_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
                     description: desc.to_string(),
                     category: category.to_string(),
                     supported: true,
+                    derived: false,
                 });
             }
         }
@@ -218,6 +228,126 @@ pub fn parse_s_extensions_with_category(isa: &str) -> Vec<ExtensionInfo> {
                 description: desc.to_string(),
                 category: category.to_string(),
                 supported: true,
+                derived: false,
+            });
+        }
+    }
+
+    s_exts
+}
+
+/// Collect the canonical names of every standard/Z/S extension the ISA string reports
+/// directly, including the ones implied by the `G` shorthand (I, M, A, F, D, Zicsr,
+/// Zifencei). Names match the `name` field of `STANDARD_EXTENSIONS`/`Z_EXTENSIONS`/
+/// `S_EXTENSIONS` exactly, so they can be fed straight into the implication tables.
+fn explicit_extension_names(isa: &str) -> BTreeSet<String> {
+    let isa_lower = isa.to_lowercase();
+    let base = isa_lower.split('_').next().unwrap_or(&isa_lower);
+    let ext_part = strip_rv_prefix(base);
+    let has_g = ext_part.contains('g');
+
+    let mut names: BTreeSet<String> = BTreeSet::new();
+
+    for name in parse_extensions_compact(isa).split_whitespace() {
+        names.insert(name.to_string());
+    }
+
+    for &(pattern, name, _desc, _category) in Z_EXTENSIONS {
+        if isa_has_extension(&isa_lower, pattern)
+            || (has_g && (pattern == "zicsr" || pattern == "zifencei"))
+        {
+            names.insert(name.to_string());
+        }
+    }
+
+    for &(pattern, name, _desc, _category) in S_EXTENSIONS {
+        if isa_has_extension(&isa_lower, pattern) {
+            names.insert(name.to_string());
+        }
+    }
+
+    names
+}
+
+/// Compute every extension name that is implied or composed from the extensions the
+/// ISA string reports directly, but that the ISA string itself does not mention (see
+/// the `implications` module). These are the names that should be shown in parentheses.
+#[must_use]
+pub fn compute_derived_extension_names(isa: &str) -> BTreeSet<String> {
+    compute_derived(&explicit_extension_names(isa))
+}
+
+/// Get standard (single-letter, including `G` expansion) extensions as `ExtensionInfo`,
+/// including ones inferred via implication/composition (e.g. `B` from `Zba`+`Zbb`+`Zbs`,
+/// per issue #10). Extensions the ISA string names directly have `derived: false`;
+/// inferred ones have `derived: true`.
+#[must_use]
+pub fn get_extensions_with_derived(isa: &str) -> Vec<ExtensionInfo> {
+    let explicit: BTreeSet<String> = parse_extensions_compact(isa)
+        .split_whitespace()
+        .map(str::to_string)
+        .collect();
+    let derived_names = compute_derived_extension_names(isa);
+
+    STANDARD_EXTENSIONS
+        .iter()
+        .filter_map(|&(_ch, name, desc)| {
+            let is_explicit = explicit.contains(name);
+            let is_derived = !is_explicit && derived_names.contains(name);
+            if is_explicit || is_derived {
+                Some(ExtensionInfo {
+                    name: name.to_string(),
+                    description: desc.to_string(),
+                    category: "std".to_string(),
+                    supported: true,
+                    derived: is_derived,
+                })
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+/// Same as [`parse_z_extensions_with_category`], plus Z-extensions inferred via
+/// implication/composition (see issue #10). Inferred entries have `derived: true`.
+#[must_use]
+pub fn parse_z_extensions_with_category_and_derived(isa: &str) -> Vec<ExtensionInfo> {
+    let mut z_exts = parse_z_extensions_with_category(isa);
+    let derived_names = compute_derived_extension_names(isa);
+
+    for &(_pattern, name, desc, category) in Z_EXTENSIONS {
+        if derived_names.contains(name) && !z_exts.iter().any(|e| e.name.eq_ignore_ascii_case(name))
+        {
+            z_exts.push(ExtensionInfo {
+                name: name.to_string(),
+                description: desc.to_string(),
+                category: category.to_string(),
+                supported: true,
+                derived: true,
+            });
+        }
+    }
+
+    z_exts
+}
+
+/// Same as [`parse_s_extensions_with_category`], plus S-extensions inferred via
+/// implication/composition (see issue #10). Inferred entries have `derived: true`.
+#[must_use]
+pub fn parse_s_extensions_with_category_and_derived(isa: &str) -> Vec<ExtensionInfo> {
+    let mut s_exts = parse_s_extensions_with_category(isa);
+    let derived_names = compute_derived_extension_names(isa);
+
+    for &(_pattern, name, desc, category) in S_EXTENSIONS {
+        if derived_names.contains(name) && !s_exts.iter().any(|e| e.name.eq_ignore_ascii_case(name))
+        {
+            s_exts.push(ExtensionInfo {
+                name: name.to_string(),
+                description: desc.to_string(),
+                category: category.to_string(),
+                supported: true,
+                derived: true,
             });
         }
     }
@@ -274,6 +404,7 @@ pub fn get_all_z_extensions_with_status(isa: &str) -> Vec<ExtensionInfo> {
                 description: desc.to_string(),
                 category: category.to_string(),
                 supported,
+                derived: false,
             }
         })
         .collect()
@@ -293,6 +424,7 @@ pub fn get_all_s_extensions_with_status(isa: &str) -> Vec<ExtensionInfo> {
                 description: desc.to_string(),
                 category: category.to_string(),
                 supported,
+                derived: false,
             }
         })
         .collect()
@@ -743,5 +875,87 @@ mod tests {
         let detail = result.unwrap();
         assert!(detail.contains("Enabled"));
         assert!(!detail.contains("VLEN"));
+    }
+
+    // === Derived extensions (issue #10) ===
+    //
+    // Real ISA strings from actual RISC-V boards, taken from external bug reports.
+    const ISA_ORANGEPI_RV2: &str = "rv64imafdcv_zicbom_zicboz_zicntr_zicond_zicsr_zifencei_zihintpause_zihpm_zfh_zfhmin_zca_zcd_zba_zbb_zbc_zbs_zkt_zve32f_zve32x_zve64d_zve64f_zve64x_zvfh_zvfhmin_zvkt_sscofpmf_sstc_svinval_svnapot_svpbmt";
+    const ISA_MANGOPI_MQ_PRO: &str = "rv64imafdc";
+
+    #[test]
+    fn derived_m_implies_zmmul() {
+        let z_exts = parse_z_extensions_with_category_and_derived("rv64ima");
+        let zmmul = z_exts.iter().find(|e| e.name == "Zmmul").unwrap();
+        assert!(zmmul.derived);
+    }
+
+    #[test]
+    fn derived_b_from_zba_zbb_zbs_composition() {
+        let std_exts = get_extensions_with_derived("rv64i_zba_zbb_zbs");
+        let b = std_exts.iter().find(|e| e.name == "B").unwrap();
+        assert!(b.derived);
+
+        // Zba alone must not compose into B.
+        let std_exts_partial = get_extensions_with_derived("rv64i_zba");
+        assert!(!std_exts_partial.iter().any(|e| e.name == "B"));
+    }
+
+    #[test]
+    fn derived_v_transitively_reaches_zve32x() {
+        let z_exts = parse_z_extensions_with_category_and_derived("rv64imafdv");
+        let zve32x = z_exts.iter().find(|e| e.name == "Zve32x").unwrap();
+        assert!(zve32x.derived);
+    }
+
+    #[test]
+    fn explicit_extension_stays_not_derived() {
+        // "zba" is spelled out directly in the ISA string, so it must never be marked
+        // derived even though it also participates in composing B.
+        let isa = "rv64i_zba_zbb_zbs";
+        let z_exts = parse_z_extensions_with_category_and_derived(isa);
+        let zba = z_exts.iter().find(|e| e.name == "Zba").unwrap();
+        assert!(!zba.derived);
+    }
+
+    #[test]
+    fn composition_with_explicit_shorthand_does_not_mark_shorthand_derived() {
+        // When "b" is already spelled out in the ISA string, B itself must stay
+        // derived: false (it's explicit), while its components (not spelled out here)
+        // become derived: true.
+        let isa = "rv64ib";
+        let std_exts = get_extensions_with_derived(isa);
+        let b = std_exts.iter().find(|e| e.name == "B").unwrap();
+        assert!(!b.derived);
+
+        let z_exts = parse_z_extensions_with_category_and_derived(isa);
+        for name in ["Zba", "Zbb", "Zbs"] {
+            let ext = z_exts.iter().find(|e| e.name == name).unwrap();
+            assert!(ext.derived, "{name} should be derived from explicit B");
+        }
+    }
+
+    #[test]
+    fn regression_orangepi_rv2_spacemit_k1_shows_derived_b() {
+        // Reported in issue #10: Zba/Zbb/Zbs are present in cpuinfo but B was not shown.
+        let std_exts = get_extensions_with_derived(ISA_ORANGEPI_RV2);
+        let b = std_exts
+            .iter()
+            .find(|e| e.name == "B")
+            .expect("B should be present (derived) for Orange Pi RV2 / SpacemiT K1");
+        assert!(b.derived);
+    }
+
+    #[test]
+    fn regression_mangopi_mq_pro_d1_shows_derived_extensions() {
+        // Reported in issue #10: M is present in cpuinfo but Zmmul was not shown.
+        let z_exts = parse_z_extensions_with_category_and_derived(ISA_MANGOPI_MQ_PRO);
+        for name in ["Zmmul", "Zca", "Zicsr"] {
+            let ext = z_exts
+                .iter()
+                .find(|e| e.name == name)
+                .unwrap_or_else(|| panic!("{name} should be derived for MangoPi MQ-Pro / D1"));
+            assert!(ext.derived, "{name} should be marked derived");
+        }
     }
 }

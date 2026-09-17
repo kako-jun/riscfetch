@@ -7,6 +7,10 @@ use serde::Serialize;
 pub struct ExtensionEntry {
     pub name: String,
     pub description: String,
+    /// `true` if this extension was not reported directly in the ISA string but was
+    /// inferred through implication or composition from other extensions that are
+    /// present (see issue #10 / `riscfetch_core::implications`).
+    pub derived: bool,
 }
 
 /// Hardware IDs from RISC-V CSRs
