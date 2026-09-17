@@ -1,7 +1,7 @@
 //! RISC-V extension definitions
 //!
 //! This module contains the constant definitions for all supported RISC-V extensions.
-//! Based on RISC-V ISA specification (2026-04) and LLVM mainline support.
+//! Based on RISC-V ISA specification (2026-09) and LLVM mainline support.
 
 /// Standard extension definitions
 /// Format: (char, name, description)
@@ -88,6 +88,7 @@ pub const Z_EXTENSIONS: &[(&str, &str, &str, &str)] = &[
     ("zic64b", "Zic64b", "64-byte Cache Block", "mem"),
     ("ziccamoa", "Ziccamoa", "Main Mem Atomics AMO", "mem"),
     ("ziccamoc", "Ziccamoc", "Main Mem Atomics CAS", "mem"),
+    ("ziccid", "Ziccid", "Inst/Data Coherence", "mem"),
     ("ziccif", "Ziccif", "Inst Fetch Coherence", "mem"),
     ("zicclsm", "Zicclsm", "Load/Store Misaligned", "mem"),
     ("ziccrse", "Ziccrse", "Reservation Set Size", "mem"),
@@ -95,6 +96,8 @@ pub const Z_EXTENSIONS: &[(&str, &str, &str, &str)] = &[
     // Multiply
     ("zmmul", "Zmmul", "Multiply Only (no Div)", "mul"),
     // Other
+    ("zicfilp", "Zicfilp", "CFI Landing Pads", "other"),
+    ("zicfiss", "Zicfiss", "CFI Shadow Stack", "other"),
     ("zimop", "Zimop", "May-Be-Operations", "other"),
     ("zilsd", "Zilsd", "Load/Store Pair", "other"),
     // Vector
@@ -161,6 +164,7 @@ pub const S_EXTENSIONS: &[(&str, &str, &str, &str)] = &[
     ("ssdbltrp", "Ssdbltrp", "Double Trap", "sup"),
     ("ssnpm", "Ssnpm", "Pointer Masking", "sup"),
     ("sspm", "Sspm", "Pointer Masking", "sup"),
+    ("sspmp", "Sspmp", "S-mode Phys Mem Protection", "sup"),
     ("ssqosid", "Ssqosid", "QoS Identifiers", "sup"),
     ("ssstateen", "Ssstateen", "State Enable", "sup"),
     ("ssstrict", "Ssstrict", "No Non-Conforming Ext", "sup"),
@@ -228,3 +232,34 @@ pub const S_CATEGORY_NAMES: &[(&str, &str)] = &[
     ("debug", "Debug"),
     ("user", "User"),
 ];
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_extension_counts() {
+        assert_eq!(Z_EXTENSIONS.len(), 103);
+        assert_eq!(S_EXTENSIONS.len(), 48);
+    }
+
+    #[test]
+    fn test_ratified_2026_09_extensions_lookup() {
+        assert!(Z_EXTENSIONS.iter().any(|&(p, n, d, c)| p == "ziccid"
+            && n == "Ziccid"
+            && d == "Inst/Data Coherence"
+            && c == "mem"));
+        assert!(Z_EXTENSIONS.iter().any(|&(p, n, d, c)| p == "zicfilp"
+            && n == "Zicfilp"
+            && d == "CFI Landing Pads"
+            && c == "other"));
+        assert!(Z_EXTENSIONS.iter().any(|&(p, n, d, c)| p == "zicfiss"
+            && n == "Zicfiss"
+            && d == "CFI Shadow Stack"
+            && c == "other"));
+        assert!(S_EXTENSIONS.iter().any(|&(p, n, d, c)| p == "sspmp"
+            && n == "Sspmp"
+            && d == "S-mode Phys Mem Protection"
+            && c == "sup"));
+    }
+}

@@ -15,7 +15,7 @@ RISC-V 系统信息工具。显示 ISA 扩展、hart 数量、硬件 ID 等信�
 
 ## 特性
 
-- **支持 147 种扩展**（100 种 Z 扩展 + 47 种 S 扩展）
+- **支持 151 种扩展**（103 种 Z 扩展 + 48 种 S 扩展）
 - **分类显示**便于阅读
 - **15 种厂商 logo**（包括 ESWIN 和 UltraRISC）
 - 脚本友好的 JSON 输出
@@ -50,7 +50,7 @@ sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 
 ```bash
 riscfetch              # 标准输出
-riscfetch -a           # 显示全部147个扩展，带 ✓/✗ 标记
+riscfetch -a           # 显示全部151个扩展，带 ✓/✗ 标记
 riscfetch -a -e        # 全部扩展带说明
 riscfetch -r           # 仅显示 RISC-V 特定信息（排除 OS、内存等）
 riscfetch -e           # 解释每个 ISA 扩展
@@ -92,7 +92,7 @@ User:       user@visionfive2
 |------|------|
 | `-r, --riscv-only` | 仅显示 RISC-V 特定信息（排除 OS、内存、运行时间） |
 | `-e, --explain` | 显示每个扩展的含义 |
-| `-a, --all` | 显示全部 147 种扩展，带 ✓/✗ 标记 |
+| `-a, --all` | 显示全部 151 种扩展，带 ✓/✗ 标记 |
 | `-j, --json` | 机器可读的 JSON 输出 |
 | `-b, --benchmark` | ISA 特定基准测试 |
 | `-l, --logo <VENDOR>` | 厂商 logo（见下文） |

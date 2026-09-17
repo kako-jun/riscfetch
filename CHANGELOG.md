@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.4.0] - 2026-09-17
+
+### Added
+- 4 ratified ISA extensions: Ziccid (Inst/Data Coherence), Sspmp (S-mode Phys Mem Protection), Zicfilp (CFI Landing Pads), Zicfiss (CFI Shadow Stack)
+
+### Changed
+- Extension count: 147 → 151 (103 Z + 48 S)
+- Detection keywords reorganized into 3 explicit tiers (SoC identifiers → board names → vendor names) so a board name shipped across multiple SoC generations resolves to the correct SoC vendor instead of a stale one (e.g. DeepComputing DC-ROMA shipped on StarFive JH7110, then SpacemiT K3 silicon; Milk-V/Banana Pi/Sipeed ship both SpacemiT K1 and K3 boards). 5 new SoC-identifier keywords added (`spacemit,k1`, `spacemit,k3`, `sg2044`, `sg2380`, `sun20i`); detection keyword count: 42 → 47
+
 ## [2.3.1] - 2026-04-27
 
 ### Fixed
