@@ -46,6 +46,8 @@ chmod +x riscfetch-linux-riscv64
 sudo mv riscfetch-linux-riscv64 /usr/local/bin/riscfetch
 ```
 
+glibc 2.31 以上が必要です。
+
 ## 使い方
 
 ```bash
