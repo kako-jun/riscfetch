@@ -27,21 +27,26 @@ jobs:
         with:
           targets: riscv64gc-unknown-linux-gnu
 
-      - name: Install cross-compilation toolchain
+      - name: Install zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
+
+      - name: Install cargo-zigbuild
+        run: cargo install cargo-zigbuild --locked
+
+      # zig may print "ignoring deprecated linker optimization setting" — harmless, build still succeeds
+      - name: Build for RISC-V (glibc 2.31 floor)
+        run: cargo zigbuild --release --target riscv64gc-unknown-linux-gnu.2.31 --package riscfetch
+
+      - name: Verify glibc floor
         run: |
+          set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y gcc-riscv64-linux-gnu
-
-      - name: Configure cargo for cross-compilation
-        run: |
-          mkdir -p .cargo
-          cat >> .cargo/config.toml << 'EOF'
-          [target.riscv64gc-unknown-linux-gnu]
-          linker = "riscv64-linux-gnu-gcc"
-          EOF
-
-      - name: Build for RISC-V
-        run: cargo build --release --target riscv64gc-unknown-linux-gnu --package riscfetch
+          sudo apt-get install -y binutils-riscv64-linux-gnu
+          max=$(riscv64-linux-gnu-objdump -T target/riscv64gc-unknown-linux-gnu/release/riscfetch | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
+          echo "max glibc symbol: $max"
+          test "$(printf 'GLIBC_2.31\n%s\n' "$max" | sort -V | tail -1)" = "GLIBC_2.31"
 
       - name: Package artifact
         run: |
