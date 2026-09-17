@@ -65,35 +65,48 @@ pub fn get_default_vendor() -> (&'static str, &'static str) {
 /// Broader than CLI aliases — includes board names and SoC identifiers.
 /// Format: (keyword, vendor_primary_alias)
 ///
-/// **Order matters**: more specific keywords (SoC IDs, board names) must come
-/// before generic vendor names. The first match wins, so e.g. "eic7700" (ESWIN)
-/// must precede "sifive" to correctly identify HiFive Premier P550.
+/// **Three tiers, checked in order. The first match wins.**
+///
+/// 1. SoC identifiers (device-tree `compatible` strings / chip part numbers) —
+///    the most reliable signal, since a board maker can ship the same board
+///    name across multiple SoC generations (e.g. DeepComputing's DC-ROMA line
+///    has shipped with StarFive JH7110 and SpacemiT K3 silicon; Milk-V,
+///    Banana Pi and Sipeed have all shipped both SpacemiT K1 and K3 boards).
+/// 2. Board names — used only as a fallback when no SoC identifier is present
+///    (e.g. `/proc/device-tree/model` without a matching `compatible` entry).
+/// 3. Vendor names — generic, lowest priority.
 const VENDOR_KEYWORDS: &[(&str, &str)] = &[
-    // SoC / board-specific (most specific first)
+    // Tier 1: SoC identifiers (most specific, checked first)
     ("eic7700", "eswin"),
     ("eic7702", "eswin"),
+    ("ur-dp1000", "ultrarisc"),
+    ("urdp1000", "ultrarisc"),
+    ("jh7110", "starfive"),
+    ("spacemit,k1", "spacemit"),
+    ("spacemit,k3", "spacemit"),
+    ("ky,x1", "spacemit"),
+    ("cv1800", "sophgo"),
+    ("sg2000", "sophgo"),
+    ("sg2044", "sophgo"),
+    ("sg2380", "sophgo"),
+    ("sun20i", "allwinner"),
+    ("esp32", "espressif"),
+    ("ch32v", "wch"),
+    ("xuantie", "thead"),
+    // Tier 2: Board names (fallback when no SoC identifier is present)
     ("ebc77", "eswin"),
     ("hifive premier", "eswin"),
     ("starpro64", "eswin"),
     ("megrez", "eswin"),
     ("dc-roma", "eswin"),
-    ("ur-dp1000", "ultrarisc"),
-    ("urdp1000", "ultrarisc"),
     ("milkv titan", "ultrarisc"),
     ("milk-v titan", "ultrarisc"),
     ("visionfive", "starfive"),
-    ("jh7110", "starfive"),
-    ("xuantie", "thead"),
     ("lichee", "sipeed"),
     ("maix", "sipeed"),
     ("star64", "pine64"),
     ("nezha", "allwinner"),
-    ("esp32", "espressif"),
-    ("cv1800", "sophgo"),
-    ("sg2000", "sophgo"),
-    ("ch32v", "wch"),
-    ("ky,x1", "spacemit"),
-    // Vendor names (generic, checked after specific keywords)
+    // Tier 3: Vendor names (generic, checked last)
     ("eswin", "eswin"),
     ("ultrarisc", "ultrarisc"),
     ("hifive", "sifive"),
@@ -257,6 +270,58 @@ mod tests {
         // "ky,x1" is rejected so future Ky-derived boards on non-SpacemiT SoCs
         // are not silently miscategorized.
         assert_eq!(detect_vendor("", "ky,orangepi-rv2"), None);
+    }
+
+    #[test]
+    fn test_detect_dc_roma_by_soc_generation() {
+        // DC-ROMA is a board name that DeepComputing has shipped with three
+        // different SoC generations. The SoC identifier must win over the
+        // board-name fallback.
+        assert_eq!(
+            detect_vendor("DeepComputing DC-ROMA", "starfive,jh7110"),
+            Some("starfive")
+        );
+        assert_eq!(
+            detect_vendor("DeepComputing DC-ROMA III", "spacemit,k3"),
+            Some("spacemit")
+        );
+        assert_eq!(
+            detect_vendor("DeepComputing DC-ROMA II", "eswin,eic7702x"),
+            Some("eswin")
+        );
+        // No SoC identifier present: fall back to the board name.
+        assert_eq!(detect_vendor("", "deepcomputing,dc-roma-ii"), Some("eswin"));
+    }
+
+    #[test]
+    fn test_detect_shared_board_soc_generations() {
+        // Milk-V / Banana Pi / Sipeed all ship boards on both SpacemiT K1
+        // and K3 silicon; the SoC identifier must disambiguate.
+        assert_eq!(
+            detect_vendor("Milk-V Jupiter2", "spacemit,k3"),
+            Some("spacemit")
+        );
+        assert_eq!(
+            detect_vendor("Banana Pi BPI-F3", "spacemit,k1"),
+            Some("spacemit")
+        );
+    }
+
+    #[test]
+    fn test_detect_sophgo_sg2044_sg2380() {
+        assert_eq!(detect_vendor("", "sophgo,sg2044"), Some("sophgo"));
+        assert_eq!(detect_vendor("", "sophgo,sg2380"), Some("sophgo"));
+    }
+
+    #[test]
+    fn test_detect_allwinner_sun20i() {
+        assert_eq!(
+            detect_vendor(
+                "Allwinner D1 Nezha",
+                "allwinner,d1-nezha allwinner,sun20i-d1"
+            ),
+            Some("allwinner")
+        );
     }
 
     #[test]
