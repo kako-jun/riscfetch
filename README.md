@@ -68,9 +68,10 @@ Extensions are grouped by category:
 
 ```
 ISA:        rv64imafdcv_zicsr_zifencei_zba_zbb_zbs_sstc...
-Ext:        I M A F D C V
+Ext:        I M A F D C V (B)
 Z-Base:     Zicsr Zifencei Zicntr Zihpm
 Z-Bit:      Zba Zbb Zbc Zbs
+Z-Multiply: (Zmmul)
 Z-Vector:   Zvl128b Zvl256b
 S-Sup:      Sstc
 Vector:     Enabled, VLEN>=256
@@ -87,6 +88,8 @@ Memory:     3.45 GiB / 8.00 GiB
 Uptime:     3h 42m
 User:       user@visionfive2
 ```
+
+Extensions shown in **parentheses**, like `(B)` or `(Zmmul)`, were not reported directly by `/proc/cpuinfo` but are implied by other extensions that are present — e.g. `Zba`+`Zbb`+`Zbs` implies `B`, and `M` implies `Zmmul`. Everything else is exactly what the kernel enumerated.
 
 ## Options
 

@@ -2,7 +2,12 @@ use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(name = "riscfetch")]
-#[command(author, version, about = "RISC-V architecture information display tool", long_about = None)]
+#[command(
+    author,
+    version,
+    about = "RISC-V architecture information display tool",
+    long_about = "RISC-V architecture information display tool\n\nExtensions shown in parentheses, e.g. (B) or (Zmmul), were not reported directly by /proc/cpuinfo but are implied by other extensions that are present (e.g. Zba+Zbb+Zbs implies B)."
+)]
 #[allow(clippy::struct_excessive_bools)]
 pub struct Args {
     /// Vendor logo (default, sifive, starfive, thead, milkv, sipeed, pine64, eswin, ultrarisc, kendryte, allwinner, espressif, spacemit, sophgo, wch)

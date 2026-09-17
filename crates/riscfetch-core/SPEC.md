@@ -276,6 +276,64 @@ Unknown extensions are still parsed but may not have descriptions.
 
 ---
 
+## Derived Extensions (Implication & Composition)
+
+`/proc/cpuinfo` only lists the extensions the kernel bothered to enumerate. It does not
+compute the extensions that are architecturally implied by those, so riscfetch computes
+them itself (issue #10).
+
+Two relations are combined:
+
+- **Implication** (forward): if extension `X` is present, its dependencies are present
+  too, even if the ISA string never spells them out. Examples: `M` implies `Zmmul`, `D`
+  implies `F`, `F` implies `Zicsr`, `A` implies `Zalrsc`+`Zaamo`, `C` implies `Zca`, `V`
+  implies a chain down to `Zve32x` (and, per the ISA manual's minimum vector
+  requirements, also `Zve64d`/`Zve64f`/`Zve32f`/`Zve64x`/`D`/`F`/`Zicsr`), `Zfh` implies
+  `Zfhmin`, `Zvfh` implies `Zvfhmin`/`Zfhmin`, `Zdinx` implies `Zfinx`, and the `Zvl*`
+  family chains from the largest declared minimum VLEN down to `Zvl32b`.
+- **Composition** (converse): some extension names are pure ISA-manual shorthand for the
+  union of a fixed set of other extensions (no behavior of their own). If every member
+  of the set is present, the shorthand name is considered present too. Examples:
+  `Zba`+`Zbb`+`Zbs` composes into `B`; `Zaamo`+`Zalrsc` composes into `A`;
+  `Zkn`+`Zkr`+`Zkt` composes into `Zk`; similarly for `Zkn`, `Zks`, `Zvkn`, `Zvks`, `Zce`.
+
+Both relations are resolved to their full transitive closure with a worklist
+(`while changed`), so implication chains and composition chains are fully followed and
+the computation terminates even in the presence of a cycle.
+
+### Source of truth
+
+The implication table (`riscfetch_core::implications::IMPLICATIONS`) is sourced from the
+`Implies` field of each `RISCVExtension` definition in LLVM mainline
+(`llvm/lib/Target/RISCV/RISCVFeatures.td`, fetched 2026-09-17). The composition table
+(`riscfetch_core::implications::COMPOSITIONS`) mirrors the same member sets, applied in
+the converse direction per the RISC-V ISA manual's definition of those names as
+shorthand. Entries that could not be confirmed against the LLVM table, or whose
+implication depends on rv32 vs rv64 in a way the table can't express (e.g. `Zcf` is only
+legal on rv32), are intentionally left out — missing coverage is preferred over a false
+positive.
+
+### `ExtensionInfo.derived`
+
+`ExtensionInfo` (returned by `get_extensions_with_derived`,
+`parse_z_extensions_with_category_and_derived`,
+`parse_s_extensions_with_category_and_derived`, and the corresponding `--all` /
+plain functions) has a `derived: bool` field:
+
+| `derived` | Meaning |
+|-----------|---------|
+| `false` | The ISA string names this extension directly (including via the `G` shorthand) |
+| `true`  | Not named directly; inferred via implication or composition |
+
+`supported` keeps its existing meaning (the extension is present) regardless of
+`derived` — a derived extension is still `supported: true`.
+
+`ExtensionEntry` (the JSON-serializable type used by `collect_riscv_info` /
+`collect_all_info`) carries the same `derived: bool` field, additively — existing
+consumers that only read `name`/`description` are unaffected.
+
+---
+
 ## Edge Cases
 
 ### Case Sensitivity
@@ -316,7 +374,7 @@ parse_extensions_compact("rv64gc") → "I M A F D C"  (not "G C")
 
 ## Version
 
-- Spec version: 2.0
-- Last updated: 2026-09
+- Spec version: 2.1
+- Last updated: 2026-09-17
 - Based on RISC-V ISA spec version: 2026-09 (Unprivileged/Privileged)
 - Reference: LLVM mainline RISC-V extension support
