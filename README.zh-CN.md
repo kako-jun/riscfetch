@@ -125,10 +125,10 @@ User:       user@visionfive2
 ### 标准扩展（11 种）
 I, E, M, A, F, D, Q, C, B, V, H
 
-### Z 扩展（98 种）
-按类别分组：Base、Hints、Cache、Conditional、Bit Manipulation、Cryptography、Floating Point、Compressed、Atomics、Memory Model、Multiply、Vector、Vector Crypto
+### Z 扩展（103 种）
+按类别分组：Base、Hints、Cache、Conditional、Bit Manipulation、Cryptography、Floating Point、Compressed、Atomics、Memory Model、Multiply、Vector、Vector Crypto、Other
 
-### S 扩展（46 种）
+### S 扩展（48 种）
 按类别分组：Virtual Memory、Supervisor、Machine、Hypervisor、Debug、User
 
 完整列表请参见 [SPEC.md](crates/riscfetch-core/SPEC.md)。

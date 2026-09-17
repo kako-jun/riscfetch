@@ -125,10 +125,10 @@ User:       user@visionfive2
 ### 標準拡張（11 種類）
 I, E, M, A, F, D, Q, C, B, V, H
 
-### Z 拡張（98 種類）
-カテゴリ別: Base, Hints, Cache, Conditional, Bit Manipulation, Cryptography, Floating Point, Compressed, Atomics, Memory Model, Multiply, Vector, Vector Crypto
+### Z 拡張（103 種類）
+カテゴリ別: Base, Hints, Cache, Conditional, Bit Manipulation, Cryptography, Floating Point, Compressed, Atomics, Memory Model, Multiply, Vector, Vector Crypto, Other
 
-### S 拡張（46 種類）
+### S 拡張（48 種類）
 カテゴリ別: Virtual Memory, Supervisor, Machine, Hypervisor, Debug, User
 
 完全なリストは [SPEC.md](crates/riscfetch-core/SPEC.md) を参照。
