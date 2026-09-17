@@ -29,15 +29,19 @@ jobs:
 
       - name: Install zig
         uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0
 
       - name: Install cargo-zigbuild
         run: cargo install cargo-zigbuild --locked
 
+      # zig may print "ignoring deprecated linker optimization setting" — harmless, build still succeeds
       - name: Build for RISC-V (glibc 2.31 floor)
         run: cargo zigbuild --release --target riscv64gc-unknown-linux-gnu.2.31 --package riscfetch
 
       - name: Verify glibc floor
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y binutils-riscv64-linux-gnu
           max=$(riscv64-linux-gnu-objdump -T target/riscv64gc-unknown-linux-gnu/release/riscfetch | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1)
