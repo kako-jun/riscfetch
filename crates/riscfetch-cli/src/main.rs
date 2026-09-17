@@ -170,15 +170,15 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool
             display_all_extensions_compact(&all_std, &all_z, &all_s);
         }
     } else {
-        // Show only detected extensions
-        let extensions_compact = info::get_extensions_compact();
-        let z_exts_with_cat = info::get_z_extensions_with_category();
-        let s_exts_with_cat = info::get_s_extensions_with_category();
+        // Show detected extensions, plus ones implied/composed from them (issue #10)
+        let std_exts = info::get_extensions_with_derived(&isa_string);
+        let z_exts_with_cat = info::parse_z_extensions_with_category_and_derived(&isa_string);
+        let s_exts_with_cat = info::parse_s_extensions_with_category_and_derived(&isa_string);
 
         if explain {
-            display_extensions_explained(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
+            display_extensions_explained(&std_exts, &z_exts_with_cat, &s_exts_with_cat);
         } else {
-            display_extensions_compact(&extensions_compact, &z_exts_with_cat, &s_exts_with_cat);
+            display_extensions_compact(&std_exts, &z_exts_with_cat, &s_exts_with_cat);
         }
     }
 
@@ -266,26 +266,45 @@ fn display_riscv_info(vendor: &str, style: &str, explain: bool, riscv_only: bool
     println!();
 }
 
+/// Format a single extension name for compact display. Extensions the ISA string
+/// names directly are shown plain; ones inferred via implication/composition (issue
+/// #10) are wrapped in parentheses and dimmed, since the parentheses (not the color)
+/// are the primary signal.
+fn format_ext_token(name: &str, derived: bool) -> String {
+    if derived {
+        format!("({name})").bright_black().to_string()
+    } else {
+        name.white().to_string()
+    }
+}
+
 /// Display extensions in compact mode (category-grouped multiple lines)
 fn display_extensions_compact(
-    std_exts: &str,
+    std_exts: &[info::ExtensionInfo],
     z_exts: &[info::ExtensionInfo],
     s_exts: &[info::ExtensionInfo],
 ) {
     // Standard extensions
     if !std_exts.is_empty() {
-        println!("{} {}", "Ext:".bright_yellow().bold(), std_exts.white());
+        let parts: Vec<String> = std_exts
+            .iter()
+            .map(|e| format_ext_token(&e.name, e.derived))
+            .collect();
+        println!("{} {}", "Ext:".bright_yellow().bold(), parts.join(" "));
     }
 
     // Z-extensions grouped by category
     let z_groups = info::group_by_category(z_exts);
     for (category, exts) in &z_groups {
         let cat_name = info::get_z_category_name(category);
-        let ext_names: Vec<&str> = exts.iter().map(|e| e.name.as_str()).collect();
+        let ext_parts: Vec<String> = exts
+            .iter()
+            .map(|e| format_ext_token(&e.name, e.derived))
+            .collect();
         println!(
             "{} {}",
             format!("Z-{cat_name}:").bright_yellow().bold(),
-            ext_names.join(" ").white()
+            ext_parts.join(" ")
         );
     }
 
@@ -293,25 +312,38 @@ fn display_extensions_compact(
     let s_groups = info::group_by_category(s_exts);
     for (category, exts) in &s_groups {
         let cat_name = info::get_s_category_name(category);
-        let ext_names: Vec<&str> = exts.iter().map(|e| e.name.as_str()).collect();
+        let ext_parts: Vec<String> = exts
+            .iter()
+            .map(|e| format_ext_token(&e.name, e.derived))
+            .collect();
         println!(
             "{} {}",
             format!("S-{cat_name}:").bright_magenta().bold(),
-            ext_names.join(" ").white()
+            ext_parts.join(" ")
         );
     }
 }
 
 /// Display extensions in explained mode (category-grouped with aligned columns)
 fn display_extensions_explained(
-    _std_exts: &str,
+    std_exts: &[info::ExtensionInfo],
     z_exts: &[info::ExtensionInfo],
     s_exts: &[info::ExtensionInfo],
 ) {
     // Standard extensions
     println!("{}", "Extensions:".bright_yellow().bold());
-    for (ext, desc) in info::get_extensions_explained() {
-        println!("  {:<10} {}", ext.bright_green(), desc);
+    for ext in std_exts {
+        let label = if ext.derived {
+            format!("({})", ext.name)
+        } else {
+            ext.name.clone()
+        };
+        let label_colored = if ext.derived {
+            label.bright_black()
+        } else {
+            label.bright_green()
+        };
+        println!("  {label_colored:<10} {}", ext.description);
     }
 
     // Z-extensions grouped by category
@@ -324,7 +356,17 @@ fn display_extensions_explained(
             format!("Z-Extensions ({cat_name}):").bright_yellow().bold()
         );
         for ext in exts {
-            println!("  {:<10} {}", ext.name.bright_green(), ext.description);
+            let label = if ext.derived {
+                format!("({})", ext.name)
+            } else {
+                ext.name.clone()
+            };
+            let label_colored = if ext.derived {
+                label.bright_black()
+            } else {
+                label.bright_green()
+            };
+            println!("  {label_colored:<10} {}", ext.description);
         }
     }
 
@@ -340,7 +382,17 @@ fn display_extensions_explained(
                 .bold()
         );
         for ext in exts {
-            println!("  {:<10} {}", ext.name.bright_green(), ext.description);
+            let label = if ext.derived {
+                format!("({})", ext.name)
+            } else {
+                ext.name.clone()
+            };
+            let label_colored = if ext.derived {
+                label.bright_black()
+            } else {
+                label.bright_green()
+            };
+            println!("  {label_colored:<10} {}", ext.description);
         }
     }
 }
