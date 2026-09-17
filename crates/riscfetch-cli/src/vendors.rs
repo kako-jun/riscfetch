@@ -65,16 +65,19 @@ pub fn get_default_vendor() -> (&'static str, &'static str) {
 /// Broader than CLI aliases — includes board names and SoC identifiers.
 /// Format: (keyword, vendor_primary_alias)
 ///
-/// **Three tiers, checked in order. The first match wins.**
+/// **Three tiers, laid out in order in a single flat list. `detect_vendor` scans it
+/// top to bottom and returns on the first substring match, so an earlier tier always
+/// wins over a later one when both appear in the combined string.**
 ///
 /// 1. SoC identifiers (device-tree `compatible` strings / chip part numbers) —
-///    the most reliable signal, since a board maker can ship the same board
-///    name across multiple SoC generations (e.g. DeepComputing's DC-ROMA line
-///    has shipped with StarFive JH7110 and SpacemiT K3 silicon; Milk-V,
-///    Banana Pi and Sipeed have all shipped both SpacemiT K1 and K3 boards).
-/// 2. Board names — used only as a fallback when no SoC identifier is present
-///    (e.g. `/proc/device-tree/model` without a matching `compatible` entry).
-/// 3. Vendor names — generic, lowest priority.
+///    listed first, since they're the most reliable signal: a board maker can ship
+///    the same board name across multiple SoC generations (e.g. DeepComputing's
+///    DC-ROMA line has shipped with StarFive JH7110 and SpacemiT K3 silicon;
+///    Milk-V, Banana Pi and Sipeed have all shipped both SpacemiT K1 and K3 boards).
+/// 2. Board names — checked after tier 1, so a board keyword only wins when no
+///    tier-1 SoC identifier matched earlier in the combined string.
+/// 3. Vendor names — generic, listed last, so they only win when neither a SoC
+///    identifier nor a board name matched.
 const VENDOR_KEYWORDS: &[(&str, &str)] = &[
     // Tier 1: SoC identifiers (most specific, checked first)
     ("eic7700", "eswin"),

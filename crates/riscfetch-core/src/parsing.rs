@@ -571,6 +571,35 @@ mod tests {
             .any(|(n, d)| n == "Sspmp" && d == "S-mode Phys Mem Protection"));
     }
 
+    #[test]
+    fn test_extension_names_no_prefix_collision() {
+        // "sspm"/"sspmp" and "ziccif"/"ziccid" share a prefix; isa_has_extension
+        // must match the full underscore-separated part only, not a substring.
+        let isa_d_p = "rv64imafdc_ziccid_sspmp";
+        let z_result = parse_z_extensions_explained(isa_d_p);
+        let s_result = parse_s_extensions_explained(isa_d_p);
+        assert!(z_result
+            .iter()
+            .any(|(n, d)| n == "Ziccid" && d == "Inst/Data Coherence"));
+        assert!(s_result
+            .iter()
+            .any(|(n, d)| n == "Sspmp" && d == "S-mode Phys Mem Protection"));
+        assert!(!z_result.iter().any(|(n, _)| n == "Ziccif"));
+        assert!(!s_result.iter().any(|(n, _)| n == "Sspm"));
+
+        let isa_f_np = "rv64imafdc_ziccif_sspm";
+        let z_result2 = parse_z_extensions_explained(isa_f_np);
+        let s_result2 = parse_s_extensions_explained(isa_f_np);
+        assert!(z_result2
+            .iter()
+            .any(|(n, d)| n == "Ziccif" && d == "Inst Fetch Coherence"));
+        assert!(s_result2
+            .iter()
+            .any(|(n, d)| n == "Sspm" && d == "Pointer Masking"));
+        assert!(!z_result2.iter().any(|(n, _)| n == "Ziccid"));
+        assert!(!s_result2.iter().any(|(n, _)| n == "Sspmp"));
+    }
+
     // === parse_vector_from_isa tests ===
 
     #[test]
