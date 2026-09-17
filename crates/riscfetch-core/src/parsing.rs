@@ -958,4 +958,28 @@ mod tests {
             assert!(ext.derived, "{name} should be marked derived");
         }
     }
+
+    #[test]
+    fn zihpm_implies_zicsr() {
+        // FeatureStdExtZihpm -> FeatureStdExtZicsr in LLVM's RISCVFeatures.td.
+        let z_exts = parse_z_extensions_with_category_and_derived("rv64i_zihpm");
+        let zicsr = z_exts
+            .iter()
+            .find(|e| e.name == "Zicsr")
+            .expect("Zicsr should be derived from Zihpm alone");
+        assert!(zicsr.derived);
+    }
+
+    #[test]
+    fn orangepi_rv2_zihpm_does_not_spuriously_derive_anything_new() {
+        // Orange Pi RV2 already spells out zicsr directly, so adding the
+        // Zihpm -> Zicsr implication must not change its derived set: Zicsr was
+        // already derived via Zicntr -> Zicsr (and is also explicit here).
+        let z_exts = parse_z_extensions_with_category_and_derived(ISA_ORANGEPI_RV2);
+        let zicsr = z_exts.iter().find(|e| e.name == "Zicsr").unwrap();
+        assert!(
+            !zicsr.derived,
+            "zicsr is spelled out explicitly in this ISA string"
+        );
+    }
 }

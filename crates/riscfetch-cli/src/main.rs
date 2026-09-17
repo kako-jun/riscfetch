@@ -343,7 +343,7 @@ fn display_extensions_explained(
         } else {
             label.bright_green()
         };
-        println!("  {label_colored:<10} {}", ext.description);
+        println!("  {label_colored:<12} {}", ext.description);
     }
 
     // Z-extensions grouped by category
@@ -366,7 +366,7 @@ fn display_extensions_explained(
             } else {
                 label.bright_green()
             };
-            println!("  {label_colored:<10} {}", ext.description);
+            println!("  {label_colored:<12} {}", ext.description);
         }
     }
 
@@ -392,7 +392,7 @@ fn display_extensions_explained(
             } else {
                 label.bright_green()
             };
-            println!("  {label_colored:<10} {}", ext.description);
+            println!("  {label_colored:<12} {}", ext.description);
         }
     }
 }

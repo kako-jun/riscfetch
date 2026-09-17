@@ -32,6 +32,7 @@ pub const IMPLICATIONS: &[(&str, &[&str])] = &[
     // --- Integer / CSR ---
     ("M", &["Zmmul"]),       // FeatureStdExtM -> Zmmul
     ("Zicntr", &["Zicsr"]),  // FeatureStdExtZicntr -> Zicsr
+    ("Zihpm", &["Zicsr"]),   // FeatureStdExtZihpm -> Zicsr
     ("Ziccid", &["Ziccif"]), // FeatureStdExtZiccid -> Ziccif
     // --- Floating point ---
     ("F", &["Zicsr"]),                // FeatureStdExtF -> Zicsr
@@ -92,6 +93,8 @@ pub const IMPLICATIONS: &[(&str, &[&str])] = &[
 /// present, the ISA manual defines `.0` as pure shorthand for that exact set, so it is
 /// considered present too.
 pub const COMPOSITIONS: &[(&str, &[&str])] = &[
+    // A is defined by the ISA manual as exactly Zaamo + Zalrsc; LLVM's separate bitmask
+    // is a hwprobe identifier, not extra behavior.
     ("A", &["Zaamo", "Zalrsc"]),
     ("B", &["Zba", "Zbb", "Zbs"]),
     ("Zce", &["Zca", "Zcb", "Zcmp", "Zcmt"]),
@@ -159,6 +162,12 @@ mod tests {
     fn m_implies_zmmul() {
         let derived = compute_derived(&set(&["M"]));
         assert!(derived.contains("Zmmul"));
+    }
+
+    #[test]
+    fn zihpm_implies_zicsr() {
+        let derived = compute_derived(&set(&["Zihpm"]));
+        assert!(derived.contains("Zicsr"));
     }
 
     #[test]
